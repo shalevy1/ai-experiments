@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        "Report a bug": "https://github.com/username/your-repo/issues"
+        "Report a bug": "https://github.com/vivekpathania/ai-experiments/issues"
     }
 )
 
@@ -22,7 +22,7 @@ with st.sidebar:
         help="Get your API key from [Groq Platform](https://console.groq.com/keys)"
     )
     "[Get your free Groq API key](https://console.groq.com/keys)"
-    "[View the source code](https://github.com)"
+    "[View the source code](https://github.com/vivekpathania/ai-experiments/blob/main/hrapp/app.py)"
     uploaded_jd_file = st.file_uploader("Upload Job Description (PDF)", key="jd")
     uploaded_cv_file = st.file_uploader("Upload Candidate CV (PDF)", key="cv")
     submitted = st.button("Evaluate Fit")
