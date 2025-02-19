@@ -68,7 +68,6 @@ class AI_Utilities:
                 evaluation['jd_summary'] = parsed_data["jd_summary"]
             except json.JSONDecodeError:
                 
-                print("Error in decoding JSON")
                 evaluation = {}
                 
             return evaluation
