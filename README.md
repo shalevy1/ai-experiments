@@ -1,6 +1,6 @@
 # 🚀 AI Experiments Suite
 
-[![Python](https://img.shields.io/badge/python-v3.9+-blue.svg)](https://www.python.org/) [![Streamlit](https://img.shields.io/badge/Streamlit-1.25.0-orange.svg)](https://streamlit.io/) [![GitHub Issues](https://img.shields.io/github/issues/your-username/ai-experiments)](https://github.com/your-username/ai-experiments/issues)
+[![Python](https://img.shields.io/badge/python-v3.9+-blue.svg)](https://www.python.org/) [![Streamlit](https://img.shields.io/badge/Streamlit-1.25.0-orange.svg)](https://streamlit.io/) [![GitHub Issues](https://img.shields.io/github/issues/vivekpathania/ai-experiments)](https://github.com/vivekpathania/ai-experiments/issues)
 
 A collection of AI/ML projects exploring generative models, NLP, and database interactions. Includes Streamlit apps for real-world use cases.
 
@@ -31,80 +31,82 @@ A Streamlit application that allows users to ask questions about SQL databases u
 - Python | Streamlit | LangChain | Groq LLM | MySQL
 
 ### Setup
-1. Install dependencies:
+**Install dependencies:**
  ```sh
  pip install -r requirements.txt
  ```
-Create .env file:
+**Create .env file:**
 env
  ```sh
 DB_URI=mysql+pymysql://username:password@localhost/dbname
 GROQ_API_KEY=your_groq_api_key_here
  ```
-Run the app:
+**Run the app:**
  ```sh
 streamlit run sqlchatbot.py
  ```
 
 ## AI Resume & JD Analyzer
-https://ai-resume-jd-analyzer.streamlit.app/
 
-### Overview
-    Automatically evaluate candidate fit for job roles using Groq LLM and Streamlit. Generates match scores and detailed reports.
+Automatically evaluate candidate fit for job roles using Groq LLM and Streamlit. Generates match scores, personalized improvement suggestions, and ATS-compliant CV rewrites.
+
+---
+
+### **Demo**
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ai-resume-jd-analyzer.streamlit.app/)
+
+---
+
 ### Key Features
-    LLM-powered resume/JD parsing
-    Automated scoring system
-    Penalty rules for overqualification
-    Real-time analysis
-    Deployable on Streamlit Cloud
+- **Score-Based Recommendations**:
+  - Score ≥**8**: CV is aligned; no changes needed.
+  - **5 ≤ Score <8**: Receive improvement suggestions and CV rewrite.
+  - Score <**5**: Redirected to refine or find a better-fitting role.
+- **Real-Time Analysis**: Instant feedback on CV-JD alignment.
+- **ATS-Compliant CV Rewrite**: Structured for applicant tracking systems.
+- **Loading Spinners**: Visual feedback during LLM processing.
+- **Dynamic UI**: Tailored experiences based on evaluation scores.
+
+---
 
 ### Tech Stack
-    Python | Streamlit | LangChain | Groq LLM | PyMuPDF
+- Python | Streamlit | LangChain | Groq LLM | PyMuPDF
+
+---
 
 ### Setup
-    
-Install dependencies:
- ```sh
-pip install -r requirements.txt
- ```
 
-Create .env file:
- ```sh
-GROQ_API_KEY=your_groq_api_key_here
+```sh
+git clone https://github.com/vivekpathania/ai-experiments
+cd hrapp
+```
+**Install dependencies:**
+```sh
+ pip install -r requirements.txt
  ```
-
-Run the app:
- ```sh
+**Run the app:**
+```sh
 streamlit run app.py
- ```
-### General Setup Instructions
+```
 
-Prerequisites
-Python 3.9+
-Streamlit
-Groq API Key (https://console.groq.com/keys)
-
-### Environment Setup
-
-Create virtual environment
- ```sh
-python -m venv .venv
-source .venv/bin/activate
- ```
-
-Install dependencies
- ```sh
-pip install -r requirements.txt
- ```
+### Usage
+- **Upload Files:** Drag-and-drop PDFs for the job description and CV.
+- **Select Mode:** Choose between Hiring or Candidate Mode.
+- **Evaluate Fit:** Click "Evaluate Fit" to generate a report.
+- **Improve CV:** Review suggestions and generate an updated CV (Score ≥5).
 
 ### License
-This project is licensed under the MIT License.
+This project is licensed under the Apache License.
 
 ### Acknowledgments
-Streamlit - For the amazing UI framework
-Groq - For powerful LLM capabilities
-LangChain - For LLM integration tools
-PyMuPDF - For PDF text extraction
+- [Streamlit](https://streamlit.io)
+- [GROQ](https://groq.com)
+- [LangChain](https://langchain.com)
+- [PyMuPDF](https://pymupdf.readthedocs.io)
+
+
+
+
 
 
 
