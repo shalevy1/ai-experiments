@@ -17,7 +17,7 @@ if "ai_utilities" not in st.session_state:
     st.session_state["ai_utilities"] = AI_Utilities()  # Store AI Utilities instance
     
 SUCCESS_SCORE = 85    
-FAILURE_SCORE = 50
+FAILURE_SCORE = 45
 
 st.set_page_config(
     page_title="AI Resume & JD Analyzer",
@@ -107,6 +107,15 @@ if mode == "Candidate" and st.session_state.get("evaluation"):
             st.session_state["generate_clicked"] = True
     else:
         container.error("Your CV does not meet the job requirements. Please consider refining it further or applying for roles with matching qualifications.")
+        container.markdown("### Report")
+        container.write(st.session_state["evaluation_report"])
+        container.markdown("### Improvement Suggestions")
+        container.text_area(
+            "Review the suggestions.",
+            value=st.session_state["suggestions"],
+            disabled=True
+        )
+        
 
 # Handle CV Generation
 if st.session_state.get("generate_clicked"):
