@@ -1,6 +1,6 @@
 # 🚀 AI Experiments Suite
 
-[![Python](https://img.shields.io/badge/python-v3.9+-blue.svg)](https://www.python.org/) [![Streamlit](https://img.shields.io/badge/Streamlit-1.25.0-orange.svg)](https://streamlit.io/) [![GitHub Issues](https://img.shields.io/github/issues/your-username/ai-experiments)](https://github.com/your-username/ai-experiments/issues)
+[![Python](https://img.shields.io/badge/python-v3.9+-blue.svg)](https://www.python.org/) [![Streamlit](https://img.shields.io/badge/Streamlit-1.25.0-orange.svg)](https://streamlit.io/) [![GitHub Issues](https://img.shields.io/github/issues/vivekpathania/ai-experiments)](https://github.com/vivekpathania/ai-experiments/issues)
 
 A collection of AI/ML projects exploring generative models, NLP, and database interactions. Includes Streamlit apps for real-world use cases.
 
@@ -77,8 +77,8 @@ Automatically evaluate candidate fit for job roles using Groq LLM and Streamlit.
 ### Setup
 
 ```sh
-git clone https://github.com/your-username/ai-resume-jd-analyzer
-cd ai-resume-jd-analyzer
+git clone https://github.com/vivekpathania/ai-experiments
+cd hrapp
 ```
 **Install dependencies:**
 ```sh
@@ -99,10 +99,15 @@ streamlit run app.py
 This project is licensed under the Apache License.
 
 ### Acknowledgments
-https://streamlit.io
-https://groq.com
-https://langchain.com
-https://pymupdf.readthedocs.io
+- [Streamlit](https://streamlit.io)
+- [GROQ](https://groq.com)
+- [LangChain](https://langchain.com)
+- [PyMuPDF](https://pymupdf.readthedocs.io)
+
+
+
+
+
 
 
 
