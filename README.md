@@ -10,15 +10,13 @@ A collection of AI/ML projects exploring generative models, NLP, and database in
 
 - [SQL Chat App](#sql-chat-app)
 - [AI Resume & JD Analyzer](#ai-resume-jd-analyzer)
+- [AI Travel Planner](#ai-travel-planner)
 
 
 ---
 
 ## SQL Chat App
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ai-resume-jd-analyzer.streamlit.app/)
-
-### Overview
 A Streamlit application that allows users to ask questions about SQL databases using natural language. Leverages Groq LLM for query generation and LangChain for database interaction.
 
 ### Key Features
@@ -108,6 +106,7 @@ This project is licensed under the Apache License.
 
 ## AI Travel Planner
 
+### **Demo**
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-travel-app.streamlit.app/)
 
 ### Overview
