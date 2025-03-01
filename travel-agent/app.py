@@ -28,9 +28,12 @@ with st.sidebar:
         
     )
     
-    api_key_tavily = st.text_input(
-        "Travily API Key", key="api_key_tavily", type="password",
-        help="Get your API key from [Tavily](https://app.tavily.com)"
+    st.divider()
+    mode = st.radio("Select Web Search Tool", ["Tavily", "SerpApi"])
+    
+    api_key_search_tool = st.text_input(
+        "Travily Or SerpApi API Key", key="api_key_search_tool", type="password",
+        help="Get your API key from [Tavily | SerpApi](https://app.tavily.com | https://serpapi.com/)"
     )
     
     if st.button("Set keys"):
@@ -40,7 +43,11 @@ with st.sidebar:
         st.session_state["conversation_agent"] = TripConversationAgent(api_key=api_key_llm) 
                 
         #if "itenaryGeneratorWorkflow" not in st.session_state:
-        st.session_state["itenaryGeneratorWorkflow"] = ItenaryGeneratorWorkflow(api_key_llm=api_key_llm,api_key_tavily=api_key_tavily)
+        search_tool = 1
+        
+        if mode == 'SerpApi':
+            search_tool = 2
+        st.session_state["itenaryGeneratorWorkflow"] = ItenaryGeneratorWorkflow(api_key_llm=api_key_llm,api_key_search_tool=api_key_search_tool,search_tool=search_tool)
             
         st.session_state["are_keys_avaibale"] = True
         
