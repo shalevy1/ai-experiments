@@ -107,7 +107,7 @@ This project is licensed under the Apache License.
 ## AI Travel Planner
 
 ### **Demo**
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://conversational-travel-agent.streamlit.app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://conversational-travel-planner.streamlit.app/)
 
 ### Overview
 A conversational travel planning application that generates customized itineraries using AI. Supports both business and leisure trips with tailored recommendations.
