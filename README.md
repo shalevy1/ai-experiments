@@ -10,15 +10,13 @@ A collection of AI/ML projects exploring generative models, NLP, and database in
 
 - [SQL Chat App](#sql-chat-app)
 - [AI Resume & JD Analyzer](#ai-resume-jd-analyzer)
+- [AI Travel Planner](#ai-travel-planner)
 
 
 ---
 
 ## SQL Chat App
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ai-resume-jd-analyzer.streamlit.app/)
-
-### Overview
 A Streamlit application that allows users to ask questions about SQL databases using natural language. Leverages Groq LLM for query generation and LangChain for database interaction.
 
 ### Key Features
@@ -103,6 +101,91 @@ This project is licensed under the Apache License.
 - [GROQ](https://groq.com)
 - [LangChain](https://langchain.com)
 - [PyMuPDF](https://pymupdf.readthedocs.io)
+
+
+
+## AI Travel Planner
+
+### **Demo**
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-travel-app.streamlit.app/)
+
+### Overview
+A conversational travel planning application that generates customized itineraries using AI. Supports both business and leisure trips with tailored recommendations.
+
+### Key Features
+- **Conversational Interface**: Natural language interaction to gather trip details
+- **Real-Time Data Integration**: Uses Tavily/SerpApi to fetch up-to-date travel information
+- **Customized Itineraries**: Generates Markdown-formatted itineraries with flight options, hotel recommendations, and daily schedules
+- **Multi-Tool Support**: Integrates Groq LLM, Tavily, and SerpApi for comprehensive data processing
+- **Visual Formatting**: Uses emojis, tables, and bullet points for clear presentation
+
+### Tech Stack
+- Python | Streamlit | Agno | Groq LLM | Tavily/SerpApi
+
+### Setup
+
+```sh
+git clone https://github.com/vivekpathania/ai-experiments
+cd travel-agent
+```
+**Install dependencies:**
+```sh
+ pip install -r requirements.txt
+ ```
+**Run the app:**
+```sh
+streamlit run app.py
+```
+
+### Usage
+1. **Enter API Keys**: Provide Groq and Tavily/SerpApi keys in the sidebar
+2. **Describe Your Trip**: Use natural language to specify trip details (e.g., "Family holiday from London to Paris for 4 days")
+3. **Generate Itinerary**: The AI will create a detailed itinerary with options for flights, hotels, and activities
+
+### Example Input
+```sh
+Business trip from New York to Tokyo from 2024-05-10 to 2024-05-15 for 1 traveler. Budget: $3000. Needs conference venues and after-work dining options.
+```
+
+### Example Output
+```markdown
+# **Tokyo Business Trip Itinerary**
+
+## Trip Summary
+- **Type:** Business
+- **Dates:** May 10 - May 15, 2024
+- **Travelers:** 1
+- **Budget:** $3,000
+
+## Flight Options
+| Airline          | Price (Adult) | Details                  |
+|------------------|---------------|--------------------------|
+| JAL              | $1,200        | Non-stop, 8 AM departure |
+| ANA              | $1,150        | 1 layover in Seoul       |
+
+## Accommodation
+| Hotel                | Price/Night | Amenities                |
+|----------------------|-------------|--------------------------|
+| Park Hyatt Tokyo     | $350        | Business center, WiFi    |
+| Mandarin Oriental    | $290        | Fitness center, breakfast|
+
+## Daily Schedule
+- **May 10**: Business meeting at Conference Center X (10 AM)
+- **May 11**: Networking dinner at Robata-tei (7 PM)
+
+## Important Tips
+- **Transportation**: Use the Tokyo Metro for easy access to business districts.
+- **Culture**: Familiarize yourself with Japanese business etiquette.
+```
+
+### License
+This project is licensed under the MIT License.
+
+### Acknowledgments
+- [Streamlit](https://streamlit.io)
+- [Groq](https://groq.com)
+- [Tavily](https://tavily.com)
+- [SerpApi](https://serpapi.com)
 
 
 
