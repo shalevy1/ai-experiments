@@ -1,6 +1,5 @@
 from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
-from agno.utils.log import logger
 import json
 from textwrap import dedent
 
@@ -53,9 +52,6 @@ class TripConversationAgent(Agent):
     def __process_tripdata(self,params_llm):
         
        
-        
-        logger.info(f"Final params before -- items: {self.finalParams}")
-        logger.info(f"Parama -- items: {params_llm}")
         missing = []
         try:
             if not self.finalParams["trip_type"]:
@@ -111,9 +107,7 @@ class TripConversationAgent(Agent):
                 else:
                     missing.append("requirements")
             
-            logger.info(f"missing -- items: {missing}")
-            logger.info(f"Final params After -- items: {self.finalParams}")
-            logger.info("__________________________\n-------------------------------------")
+          
             
             if missing:
                 missing_params = ", ".join(missing)
@@ -157,7 +151,7 @@ class TripConversationAgent(Agent):
         else:
             final_query = query+" "+self.suffix
         try:
-            logger.info(f"final_query------------------------: {final_query}")
+            
             response: RunResponse = self.run(final_query)
             
             """Only in case of deepseek"""
