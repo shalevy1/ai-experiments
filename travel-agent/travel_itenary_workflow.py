@@ -73,7 +73,7 @@ class ItenaryGeneratorWorkflow(Workflow):
             name="Travel Data Gatherer",
             description="Collects real-time travel data and local information",
             instructions=dedent("""\
-                Your task is to collect comprehensive travel data using Tavily tools based on the trip type.
+                Your task is to collect comprehensive travel data using Tavily tools based on the trip type and user preferences.
                 
                 **General Instructions:**
                 - Always use the most up-to-date information available.
@@ -82,18 +82,29 @@ class ItenaryGeneratorWorkflow(Workflow):
                 - Provide specific names and addresses for locations.
                 - Limit results to the top 3 options per category unless specified otherwise.
 
-                **Common Tasks (All Trips):**
-                1. **Flights:**
-                - Find 3 flight options with:
+                **Flight Search Instructions:**
+                1. **Check User Preferences:**
+                - If the user specified flight preferences (direct, layover, airline), strictly follow those.
+                - If no flight preferences are specified:
+                    - For **business trips**: Prioritize non-stop flights.
+                    - For **holiday trips**: Include both direct and layover flights, highlighting cost differences.
+                2. **Flight Details:**
+                - For each flight option, include:
                     - Airline name
                     - Departure/arrival times
                     - Price per adult/child
-                    - Airport codes (origin/destination)
-                    - Layover information (if applicable)
-                - Prioritize non-stop flights where possible.
+                    - Origin/destination airport codes
+                    - Layover information (number of stops, duration)
+                - If direct flights are unavailable, provide the fastest layover options.
 
-                2. **Hotels:**
-                - Find 3 hotel options with:
+                **Accommodation Search Instructions:**
+                1. **Check User Preferences:**
+                - If the user specified accommodation preferences (e.g., "family-friendly," "business hotel"), use those.
+                2. **Default Preferences Based on Trip Type:**
+                - For **business trips**: Prioritize hotels with business centers, high-speed internet, and meeting facilities.
+                - For **holiday trips**: Prioritize hotels with family amenities (pool, kids' club, etc.).
+                3. **Hotel Details:**
+                - For each hotel option, include:
                     - Hotel name
                     - Address
                     - Price per night (family room preferred)
@@ -101,7 +112,8 @@ class ItenaryGeneratorWorkflow(Workflow):
                     - Distance from city center/airport
                     - Amenities (pool, Wi-Fi, breakfast, etc.)
 
-                3. **Transportation:**
+                **Common Tasks (All Trips):**
+                1. **Transportation:**
                 - Find 3 transportation options between airport and city center:
                     - Option 1: Private transfer (provider, price, vehicle type)
                     - Option 2: Public transport (cost, duration, route)
@@ -115,14 +127,12 @@ class ItenaryGeneratorWorkflow(Workflow):
                     - Opening hours
                     - Ticket price (adult/child)
                     - Description (suitable for ages)
-
                 2. **Shopping:**
                 - Identify 3 popular souvenir shopping locations:
                     - Market name
                     - Address
                     - Operating hours
                     - Type of items sold
-
                 3. **Dining:**
                 - Find 5 kid-friendly restaurants:
                     - Restaurant name
@@ -138,7 +148,6 @@ class ItenaryGeneratorWorkflow(Workflow):
                     - Address
                     - Services offered
                     - Operating hours
-
                 2. **After-Work Activities:**
                 - Find 3 nearby restaurants/bars:
                     - Name
@@ -146,7 +155,6 @@ class ItenaryGeneratorWorkflow(Workflow):
                     - Cuisine type
                     - Price range
                     - Operating hours
-
                 3. **Quick Shopping:**
                 - Identify 2 souvenir shops near business areas:
                     - Shop name
@@ -167,7 +175,8 @@ class ItenaryGeneratorWorkflow(Workflow):
                             "price_child": "float",
                             "airport_origin": "string",
                             "airport_destination": "string",
-                            "layovers": "int"
+                            "layovers": "int",
+                            "layover_details": "string"
                         },
                         ...
                     ],
@@ -182,45 +191,7 @@ class ItenaryGeneratorWorkflow(Workflow):
                         },
                         ...
                     ],
-                    "transportation": [
-                        {
-                            "type": "string",
-                            "provider": "string",
-                            "cost": "float",
-                            "duration": "string"
-                        },
-                        ...
-                    ],
-                    "attractions": [
-                        {
-                            "name": "string",
-                            "address": "string",
-                            "hours": "string",
-                            "price_adult": "float",
-                            "price_child": "float",
-                            "description": "string"
-                        },
-                        ...
-                    ],
-                    "shopping": [
-                        {
-                            "name": "string",
-                            "address": "string",
-                            "hours": "string",
-                            "items_sold": "string"
-                        },
-                        ...
-                    ],
-                    "dining": [
-                        {
-                            "name": "string",
-                            "address": "string",
-                            "price_range": "string",
-                            "specialties": "string",
-                            "features": ["string"]
-                        },
-                        ...
-                    ]
+                    ...
                 }
             """),
             tools=[searchTool],
@@ -258,25 +229,27 @@ class ItenaryGeneratorWorkflow(Workflow):
                 
                 2. **Options Section:**
                 - **Flights Table:**
-                    - Columns: Airline, Price (Adult/Child), Details
+                    - Columns: Airline, Departure, Arrival, Price (Adult/Child), Details
                     - Include all 3 flight options
+                    - Format:
+                        | Airline          | Departure       | Arrival       | Price (Adult/Child) | Details                  |
+                        |------------------|-----------------|---------------|---------------------|--------------------------|
+                        | Air France       | 07:00 AM (CDG)  | 10:00 AM (LHR)| $800/$400           | Non-stop flight          |
                 - **Hotels Table:**
-                    - Columns: Hotel, Price/Night, Amenities
+                    - Columns: Hotel, Address, Price/Night, Amenities
                     - Include all 3 hotel options
-                - **Transportation Table:**
-                    - Columns: Option, Provider, Cost, Duration
-                    - Include all 3 transportation options
+                    - Format:
+                        | Hotel                | Address                  | Price/Night | Amenities                |
+                        |----------------------|--------------------------|-------------|--------------------------|
+                        | Le Bristol Paris     | 11 Rue du Faubourg Saint-Honoré, 75008 Paris, France | $500        | Pool, Wi-Fi, Breakfast   |
                 
                 3. **Daily Schedule:**
                 - Create a day-by-day schedule using time-stamped bullet points
                 - Format:
                     - **Day 1 (Date):**
-                    - 🚄 09:00 AM: Departure
-                    - 🏨 11:00 AM: Hotel check-in
+                    - 🚄 09:00 AM: Departure from [Airport Code]
+                    - 🏨 11:00 AM: Check-in at [Hotel Name], [Hotel Address]
                     - 🎠 02:00 PM: Visit [Attraction Name]
-                - Include activities based on trip type:
-                    - Family/Holiday: Attractions, dining, shopping
-                    - Business: Meetings, after-work activities
                 
                 4. **Additional Sections:**
                 - **Shopping Tips:**
@@ -300,9 +273,9 @@ class ItenaryGeneratorWorkflow(Workflow):
                 - Format: 
                     | Category       | Cost     |
                     |----------------|----------|
-                    | Flights        | $XXX     |
-                    | Accommodation  | $XXX     |
-                    | Total          | $XXX     |
+                    | Flights        | $2,400   |
+                    | Accommodation  | $2,000   |
+                    | Total          | $4,400   |
                 
                 **Formatting Guidelines:**
                 - Use bold headers for main sections
@@ -325,18 +298,25 @@ class ItenaryGeneratorWorkflow(Workflow):
                 - **Budget:** $5,000
 
                 ## Flight Options
-                | Airline          | Price (Adult/Child) | Details                  |
-                |------------------|---------------------|--------------------------|
-                | Air France       | $800/$400           | Non-stop, 7AM departure  |
-                | Delta Airlines   | $850/$425           | 1 layover in Amsterdam   |
-                | American Airlines| $820/$410           | Free in-flight entertainment |
+                | Airline          | Departure       | Arrival       | Price (Adult/Child) | Details                  |
+                |------------------|-----------------|---------------|---------------------|--------------------------|
+                | Air France       | 07:00 AM (CDG)  | 10:00 AM (LHR)| $800/$400           | Non-stop flight          |
+                | Delta Airlines   | 08:30 AM (JFK)  | 11:00 AM (CDG)| $850/$425           | 1 layover in Amsterdam   |
+                | American Airlines| 09:15 AM (EWR)  | 12:00 PM (CDG)| $820/$410           | Free in-flight entertainment |
+
+                ## Hotel Options
+                | Hotel                | Address                  | Price/Night | Amenities                |
+                |----------------------|--------------------------|-------------|--------------------------|
+                | Le Bristol Paris     | 11 Rue du Faubourg Saint-Honoré, 75008 Paris, France | $500        | Pool, Wi-Fi, Breakfast   |
+                | Four Seasons Hotel   | 31 Avenue George V, 75008 Paris, France | $550        | Babysitting, Concierge   |
+                | Shangri-La Hotel     | 10 Avenue d'Iéna, 75116 Paris, France | $450        | River view, Family rooms |
 
                 ## Daily Schedule
                 - **April 1 (Day 1):**
-                - ✈️ 09:00 AM: Departure from New York
-                - 🚗 11:00 AM: Private transfer to hotel
-                - 🏨 12:00 PM: Check-in at Le Bristol Paris
-                - 🎠 03:00 PM: Visit Eiffel Tower
+                - ✈️ 07:00 AM: Departure from New York (JFK)
+                - 🚗 10:00 AM: Private transfer to hotel
+                - 🏨 11:00 AM: Check-in at Le Bristol Paris, 11 Rue du Faubourg Saint-Honoré
+                - 🎠 02:00 PM: Visit Eiffel Tower
 
                 ## Shopping Tips
                 - 🛍️ Visit Galeries Lafayette for luxury souvenirs
@@ -385,11 +365,11 @@ class ItenaryGeneratorWorkflow(Workflow):
         
         # Step 1: Generate enhanced query
         enhanced_query = self.travel_query_generator.run(raw_query)
-        logger.info(f"Enhanced Query: {enhanced_query.content}")
+        #logger.info(f"Enhanced Query: {enhanced_query.content}")
 
         # Step 2: Collect travel data
         data = self.researcher.run(enhanced_query.content)
-        logger.info(f"Collected Data: {data.content}")
+        #logger.info(f"Collected Data: {data.content}")
 
         # # Step 3: Generate itinerary
         itinerary = self.travel_agent.run(data.content)

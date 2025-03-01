@@ -3,7 +3,11 @@ from agno.models.groq import Groq
 import json
 from textwrap import dedent
 
+MESSAGE_SUFFIX = "\n-If any of these prametrs are missing please create a response for the user to provide them in a conversational manner and add return this response in the message key"
+
 class TripConversationAgent(Agent):
+    
+    
     def __init__(self, api_key):
         
         super().__init__(
@@ -14,17 +18,15 @@ class TripConversationAgent(Agent):
                 api_key=api_key
             ),
           
-            
+           # - Make sure to always add a message key to the output JSON.
+           #  - The retuned JSON should only have the follwing keys trip_type, origin, destination, dates,accommodation, travelers,budget,requirements, message. No extra keys should be added and None should be assigned to keys if they do not have a value
             instructions=dedent("""\
                 Your task is to extract trip details from the user's query.
                 
                 - The origin and destination should be a city.
-                - If any parameter is missing, note it as null.
                 - Return a structured JSON response with the extracted parameters and a message within the json asking for missing information in a conversational manner.
-                - The retuned JSON should only have the follwing keys trip_type, origin, destination, dates,accommodation, travelers,budget,requirements, message. No extra keys should be added and None should be assigned to keys if they do not have a value
+                - The retuned JSON should only have the keys mentioned in the query
                 - The dates key should be always in this format "dates": {"start_date": "2024-04-01", "end_date": "2024-04-05"}
-                - Make sure to always add a message key to the output JSON.
-               
                 - Respond only with a valid JSON do not add any extra information like json or ```
             """
             
@@ -45,83 +47,42 @@ class TripConversationAgent(Agent):
             
             
         }
-       
+        self.final_param_keys = self.finalParams.keys()
         self.suffix = ""
+        
 
     
     def __process_tripdata(self,params_llm):
         
        
         missing = []
-        try:
-            if not self.finalParams["trip_type"]:
-                if params_llm["trip_type"]:
-                    self.finalParams["trip_type"] = params_llm["trip_type"]
-                else:
-                    missing.append("trip_type")
+        
+        params_llm_keys = params_llm.keys()
+        for key in self.final_param_keys:
+            try:
+                
+                if not self.finalParams[key]:
+                    if key in params_llm_keys:
+                        if params_llm[key]:
+                            self.finalParams[key] = params_llm[key]
+                        else:
+                            missing.append(key)
+                    else:
+                        missing.append(key)
                     
-            if not self.finalParams["origin"]:
-                if params_llm["origin"]:
-                    self.finalParams["origin"] = params_llm["origin"]
-                else:
-                    missing.append("origin")
-                    
-            if not self.finalParams["destination"]:
-                if params_llm["destination"]:
-                    self.finalParams["destination"] = params_llm["destination"]
-                else:
-                    missing.append("destination")
-                    
-            if not self.finalParams["dates"]:
-                if params_llm["dates"]:
-                    try:
-                        if params_llm["dates"]["start_date"] and params_llm["dates"]["end_date"]:
-                            self.finalParams["dates"] = params_llm["dates"]
-                    except:
-                        pass
-                    
-                else:
-                    missing.append("dates")
-                    
-            if not self.finalParams["travelers"]:
-                if params_llm["travelers"]:
-                    self.finalParams["travelers"] = params_llm["travelers"]
-                else:
-                    missing.append("travelers")
-                    
-            if not self.finalParams["accommodation"]:
-                if params_llm["accommodation"]:
-                    self.finalParams["accommodation"] = params_llm["accommodation"]
-                else:
-                    missing.append("accommodation")
-                    
-            if not self.finalParams["budget"]:
-                if params_llm["budget"]:
-                    self.finalParams["budget"] = params_llm["budget"]
-                else:
-                    missing.append("budget")
-                    
-            if not self.finalParams["requirements"]:
-                if params_llm["requirements"]:
-                    self.finalParams["requirements"] = params_llm["requirements"]
-                else:
-                    missing.append("requirements")
+            except:
+                pass
+       
             
-          
-            
-            if missing:
-                missing_params = ", ".join(missing)
-                return {"user_message":f"Please provide the follwing missing params which are required  : {missing_params}.",
-                        "query_suffix":f"Identify the following parameters: {missing_params}.","missing":True}
-            else:
-                return {"user_message":"Thank you! Planning your trip..",
-                        "query_suffix":"",
-                        "missing":False}
-        except:
-            
-            return {"user_message":"There was a problem 😖 please try again.",
-                        "query_suffix":"",
-                        "missing":True}
+        if missing:
+            missing_params = ", ".join(missing)
+            return {"user_message":f"Please provide the follwing missing params which are required  : {missing_params}.",
+                    "query_suffix":f"\n -Identify the following parameters only {missing_params} and retunr only these parameters in the output JSON.{MESSAGE_SUFFIX}","missing":True}
+        else:
+            return {"user_message":"Thank you! Planning your trip..",
+                    "query_suffix":"",
+                    "missing":False}
+       
        
             
             
@@ -147,9 +108,13 @@ class TripConversationAgent(Agent):
         
        
         if len(self.suffix) == 0:
-            final_query = query+" Identify the following parameters: trip_type, origin, destination, dates, travelers,accommodation,budget,requirements"
+            
+            keys = ", ".join(self.final_param_keys)
+            final_query = query+f"\n-Identify the following parameters only {keys} and return only these keys in the output JSON.{MESSAGE_SUFFIX}"
         else:
-            final_query = query+" "+self.suffix
+            final_query = query+"\n-"+self.suffix
+            
+        
         try:
             
             response: RunResponse = self.run(final_query)
@@ -168,8 +133,7 @@ class TripConversationAgent(Agent):
             self.suffix = result["query_suffix"]
             user_message = result["user_message"]
             have_further_conversation = result["missing"]
-            
-        
+      
             if not params["message"] or not have_further_conversation:
                 return {"message":user_message,"have_further_conversation":have_further_conversation,'data':self.finalParams}
                 
