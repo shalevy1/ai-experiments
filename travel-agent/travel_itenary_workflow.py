@@ -1,41 +1,30 @@
 from agno.agent import Agent, RunResponse
-from agno.models.groq import Groq
 from agno.utils.log import logger
 from agno.workflow import Workflow
-from agno.tools.tavily import TavilyTools
-from textwrap import dedent
-from agno.tools.serpapi import SerpApiTools
 from instructions import Instructions
+from utils import getModel,getSearchTool
 
 class ItenaryGeneratorWorkflow(Workflow):
     description: str = "Comprehensive Travel Itinerary Workflow"
-    def __init__(self, api_key_llm:str,api_key_search_tool:str,search_tool=1):
+    def __init__(self, api_key_llm:str,api_key_search_tool:str,search_tool:str,llm_mode:str):
+        
         self.travel_query_generator: Agent = Agent(
             name="Travel Query Enhancer",
             description="Generates structured trip-specific queries",
             instructions= Instructions.QUERY_ENHANCER_INSTRUCTIONS,
-            model=Groq(
-                id="llama-3.3-70b-versatile",
-                api_key=api_key_llm
-            ),
+            model=getModel(llm_mode,api_key_llm),
             debug_mode=False,
             
             add_datetime_to_instructions = True
         )
-        if search_tool == 1:
-            searchTool =  TavilyTools(api_key=api_key_search_tool)
-        else:
-            searchTool =  SerpApiTools(api_key=api_key_search_tool)
+        
 
         self.researcher = Agent(
             name="Travel Data Gatherer",
             description="Collects real-time travel data and local information",
             instructions=Instructions.RESEARCH_INSTRUCTIONS,
-            tools=[searchTool],
-            model=Groq(
-                id="llama-3.3-70b-versatile",
-                api_key=api_key_llm
-            ),
+            tools=[getSearchTool(search_tool=search_tool,api_key_search_tool=api_key_search_tool)],
+            model=getModel(llm_mode,api_key_llm),
             debug_mode=False,
            
             add_datetime_to_instructions = True
@@ -45,10 +34,7 @@ class ItenaryGeneratorWorkflow(Workflow):
             name="Itinerary Compiler",
             description="Generates visually appealing markdown itinerary",
             instructions=Instructions.ITINERARY_INSTRUCTIONS,
-            model=Groq(
-                id="llama-3.3-70b-versatile",
-                api_key=api_key_llm
-            ),
+            model=getModel(llm_mode,api_key_llm),
             markdown=True,
             debug_mode=False,
                 
@@ -64,7 +50,10 @@ class ItenaryGeneratorWorkflow(Workflow):
                       Budget: {queryJSON['budget']}.
                       Please include multiple options for flights, accomodation, and transportation."""                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
-        return query          
+        return query   
+    
+    
+               
 
     def run(self, payload: str) -> RunResponse:
         

@@ -22,32 +22,44 @@ if "are_keys_avaibale" not in st.session_state:
 
 with st.sidebar:
     
+    llm_mode = st.radio("Select Model Provider", ["Groq", "OpenAI"], horizontal = True)
+    
     api_key_llm = st.text_input(
-        "Groq API Key", key="api_key_llm", type="password",
-        help="Get your API key from [Groq Platform](https://console.groq.com/keys)"
+        "Groq or OpenAI API Key", key="api_key_llm", type="password"
         
+        
+    )
+    st.html(
+    '<a href="https://console.groq.com/keys">Get your API key from Groq Platform</a>'
+    )
+    st.html(
+    '<a href="https://console.groq.com/keys">Get your API key from OpenAI</a>'
     )
     
     st.divider()
-    mode = st.radio("Select Web Search Tool", ["Tavily", "SerpApi"])
+    web_search_mode = st.radio("Select Web Search Tool", ["Tavily", "SerpApi"], horizontal = True)
     
     api_key_search_tool = st.text_input(
-        "Travily Or SerpApi API Key", key="api_key_search_tool", type="password",
-        help="Get your API key from [Tavily | SerpApi](https://app.tavily.com | https://serpapi.com/)"
+        "Travily Or SerpApi Key", key="api_key_search_tool", type="password"
+        
     )
+    
+    st.html(
+    '<a href="https://app.tavily.com">Get your API key from Tavily</a>'
+    )
+    st.html(
+    '<a href="https://serpapi.com/">Get your API key from SerpApi</a>'
+    )
+   
     
     if st.button("Set keys"):
         
         #if "conversation_agent" not in st.session_state:
         
-        st.session_state["conversation_agent"] = TripConversationAgent(api_key=api_key_llm) 
+        st.session_state["conversation_agent"] = TripConversationAgent(api_key=api_key_llm,llm_mode=llm_mode) 
                 
         #if "itenaryGeneratorWorkflow" not in st.session_state:
-        search_tool = 1
-        
-        if mode == 'SerpApi':
-            search_tool = 2
-        st.session_state["itenaryGeneratorWorkflow"] = ItenaryGeneratorWorkflow(api_key_llm=api_key_llm,api_key_search_tool=api_key_search_tool,search_tool=search_tool)
+        st.session_state["itenaryGeneratorWorkflow"] = ItenaryGeneratorWorkflow(api_key_llm=api_key_llm,api_key_search_tool=api_key_search_tool,search_tool=web_search_mode,llm_mode=llm_mode)
             
         st.session_state["are_keys_avaibale"] = True
         

@@ -1,22 +1,19 @@
 from agno.agent import Agent, RunResponse
-from agno.models.groq import Groq
 import json
 from instructions import Instructions
+from utils import getModel
 
 MESSAGE_SUFFIX = "\n-If any of these prametrs are missing please create a response for the user to provide them in a conversational manner and add return this response in the message key"
 
 class TripConversationAgent(Agent):
     
     
-    def __init__(self, api_key):
+    def __init__(self, api_key,llm_mode:str):
         
         super().__init__(
             name="Conversational Trip Data Extractor",
             description="Have a conversation with the user about their trip to extract their trip requirements in a structured format.",
-            model=Groq(
-                id="llama-3.3-70b-versatile",
-                api_key=api_key
-            ),
+            model=getModel(llm_mode,api_key),
           
            # - Make sure to always add a message key to the output JSON.
            #  - The retuned JSON should only have the follwing keys trip_type, origin, destination, dates,accommodation, travelers,budget,requirements, message. No extra keys should be added and None should be assigned to keys if they do not have a value
@@ -103,7 +100,6 @@ class TripConversationAgent(Agent):
             final_query = query+f"\n-Identify the following parameters only {keys} and return only these keys in the output JSON.{MESSAGE_SUFFIX}"
         else:
             final_query = query+"\n-"+self.suffix
-            
         
         try:
             
