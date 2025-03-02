@@ -13,6 +13,7 @@ A collection of AI/ML projects exploring generative models, NLP, and database in
 - [AI Travel Planner](#ai-travel-planner)
 
 
+
 ---
 
 ## SQL Chat App
@@ -29,7 +30,22 @@ A Streamlit application that allows users to ask questions about SQL databases u
 - Python | Streamlit | LangChain | Groq LLM | MySQL
 
 ### Setup
+
+```sh
+git clone https://github.com/vivekpathania/ai-experiments
+cd sqlchatbot
+```
+
+**Virtual Environment:**
+
+ ```sh
+ pip install virtualenv
+ python3 -m venv env
+ source env/bin/activate
+ ```
+
 **Install dependencies:**
+
  ```sh
  pip install -r requirements.txt
  ```
@@ -78,6 +94,15 @@ Automatically evaluate candidate fit for job roles using Groq LLM and Streamlit.
 git clone https://github.com/vivekpathania/ai-experiments
 cd hrapp
 ```
+
+**Virtual Environment:**
+
+ ```sh
+ pip install virtualenv
+ python3 -m venv env
+ source env/bin/activate
+ ```
+
 **Install dependencies:**
 ```sh
  pip install -r requirements.txt
@@ -128,6 +153,15 @@ A conversational travel planning application that generates customized itinerari
 git clone https://github.com/vivekpathania/ai-experiments
 cd travel-agent
 ```
+
+**Virtual Environment:**
+
+ ```sh
+ pip install virtualenv
+ python3 -m venv env
+ source env/bin/activate
+ ```
+ 
 **Install dependencies:**
 ```sh
  pip install -r requirements.txt

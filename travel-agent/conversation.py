@@ -1,7 +1,7 @@
 from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
 import json
-from textwrap import dedent
+from instructions import Instructions
 
 MESSAGE_SUFFIX = "\n-If any of these prametrs are missing please create a response for the user to provide them in a conversational manner and add return this response in the message key"
 
@@ -20,17 +20,7 @@ class TripConversationAgent(Agent):
           
            # - Make sure to always add a message key to the output JSON.
            #  - The retuned JSON should only have the follwing keys trip_type, origin, destination, dates,accommodation, travelers,budget,requirements, message. No extra keys should be added and None should be assigned to keys if they do not have a value
-            instructions=dedent("""\
-                Your task is to extract trip details from the user's query.
-                
-                - The origin and destination should be a city.
-                - Return a structured JSON response with the extracted parameters and a message within the json asking for missing information in a conversational manner.
-                - The retuned JSON should only have the keys mentioned in the query
-                - The dates key should be always in this format "dates": {"start_date": "2024-04-01", "end_date": "2024-04-05"}
-                - Respond only with a valid JSON do not add any extra information like json or ```
-            """
-            
-            ),
+            instructions=Instructions.CONVERSATION_INSTRUCTIONS,
            
             add_datetime_to_instructions = True
             
