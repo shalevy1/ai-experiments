@@ -37,7 +37,7 @@ with st.sidebar:
     llm_mode = st.radio("Select Model Provider", ["Groq", "OpenAI"], horizontal = True)
     
     api_key_llm = st.text_input(
-        "Groq or OpenAI API Key - [Groq](https://console.groq.com/keys) | [OpenAI](https://console.groq.com/keys)", key="api_key_llm", type="password",value='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' 
+        "Groq or OpenAI API Key - [Groq](https://console.groq.com/keys) | [OpenAI](https://console.groq.com/keys)", key="api_key_llm", type="password"
     )
    
    
