@@ -1,13 +1,13 @@
 import streamlit as st
 from conversation import ConversationAgent
 from shopping_team import ShoppingTeam
-from image_processing import ProductImageProcesingAgent
-from PIL import Image as PILImage
+from image_processing import ProductImageProcessingAgent
+
 import asyncio
 
 
 async def get_gemini_response(imageData,api_key):
-        p = ProductImageProcesingAgent(api_key=api_key)
+        p = ProductImageProcessingAgent(api_key=api_key)
         resp =  p.process_image(image_data=imageData)
         return resp.content
         
