@@ -3,15 +3,6 @@ from conversation import ConversationAgent
 from shopping_team import ShoppingTeam
 from image_processing import ProductImageProcessingAgent
 
-import asyncio
-
-
-async def get_gemini_response(imageData,api_key):
-        p = ProductImageProcessingAgent(api_key=api_key)
-        resp =  p.process_image(image_data=imageData)
-        return resp.content
-        
-
 
 st.set_page_config(
     page_title="E-commerce Shopping Assistant", 
@@ -34,14 +25,12 @@ image_container = st.container()
 
 with st.sidebar:
     st.header("🔧 Configuration")
-    llm_mode = st.radio("Select Model Provider", ["Groq", "OpenAI"], horizontal = True)
+    llm_mode = 'OpenAI'
     
     api_key_llm = st.text_input(
-        "Groq or OpenAI API Key - [Groq](https://console.groq.com/keys) | [OpenAI](https://console.groq.com/keys)", key="api_key_llm", type="password"
+        "OpenAI API Key - [OpenAI](https://console.groq.com/keys)", key="api_key_llm", type="password"
     )
    
-   
-    st.divider()
     web_search_mode = st.radio("Search & Scraping Tools", ["Tavily", "SerpApi"], horizontal = True)
     
     api_key_search_tool = st.text_input(
@@ -54,22 +43,14 @@ with st.sidebar:
         
     )
     
-    api_key_gemini = st.text_input(
-        "Gemini API Key - [Gemini](https://aistudio.google.com/)", key="api_key_gemini", type="password",value=""
-        
-    )
-    
-   
     
     if st.button("Set keys"):
         
        
         st.session_state["conversation_agent"] = ConversationAgent(api_key=api_key_llm,llm_mode=llm_mode) 
         st.session_state["shopping_team"] = ShoppingTeam(api_key_llm=api_key_llm,api_key_search_tool=api_key_search_tool,search_tool=web_search_mode,llm_mode=llm_mode,firecrawl_api_key=api_key_firecrawl)
-        st.session_state["gemini_key"] = api_key_gemini
+        st.session_state["image_processor"] = ProductImageProcessingAgent(api_key=api_key_llm,llm_mode=llm_mode)
         
-        
-            
         st.session_state["are_keys_avaibale"] = True
         
     if not st.session_state["are_keys_avaibale"]:
@@ -106,6 +87,9 @@ user_query = st.chat_input("Ask anything about your shopping needs",accept_file=
 
 if user_query:
     # Append user message
+    user_input = ""
+    if len(user_query["text"]) > 0:
+        user_input = user_query["text"]
     if len(user_query["files"]) > 0:
         f = user_query["files"][0]
        
@@ -116,23 +100,24 @@ if user_query:
             use_container_width=False
         )
         bytes_data = f.getvalue()
-        try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            user_query = loop.run_until_complete(get_gemini_response(bytes_data,st.session_state["gemini_key"]))
+        with st.spinner("Processing image..."):
+            try:
+                
+                resp = st.session_state["image_processor"].process_image(image_data=bytes_data) 
+                user_inputs = resp.content
+                
+            except Exception as e:
+                st.error(f"Analysis error: {e}")
             
-            
-        except Exception as e:
-            st.error(f"Analysis error: {e}")
-
+    
+        
     if st.session_state["are_keys_avaibale"]:
         
-    
-        st.session_state.messages.append({"role": "user", "content": user_query})
+        st.session_state.messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
-            st.markdown(user_query)
+            st.markdown(user_input)
         
-        response =  st.session_state['conversation_agent'].process_query(user_query)
+        response =  st.session_state['conversation_agent'].process_query(user_input)
         
         # Append assistant response
         if response['have_further_conversation']:

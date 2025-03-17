@@ -2,6 +2,11 @@
 
 This project is an AI-powered e-commerce shopping assistant that helps users find and compare products effortlessly. It leverages large language models (LLMs), web search tools, and web scraping to provide a seamless shopping experience.
 
+### **Demo**
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecom-shopping-assistant.streamlit.app/)
+
+
+
 ## Features
 
 -   **Conversational Interface:** Interact with the AI assistant through a natural language chat interface.
@@ -111,9 +116,9 @@ This project is licensed under the Apache License.
 
 ## Acknowledgments
 - [Streamlit](https://streamlit.io)
-- [GROQ](https://groq.com)
+- [OpenAI](https://platform.openai.com/)
 - [Tavily](https://tavily.com)
 - [SerpApi](https://serpapi.com)
 - [Firecrawl](https://www.firecrawl.dev/)
-- [Gemini](https://aistudio.google.com/))
+
 
