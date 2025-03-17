@@ -10,7 +10,7 @@ class ProductImageProcessingAgent(Agent):
     Agent responsible for identifying the product in an image and generating a text query.
     """
 
-    def __init__(self, api_key: str,llm_mode: str):
+    def __init__(self, api_key: str, llm_mode: str):
         """
         Initializes the ProductImageProcessingAgent.
 
