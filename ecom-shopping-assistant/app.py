@@ -28,8 +28,7 @@ with st.sidebar:
     llm_mode = 'OpenAI'
     
     api_key_llm = st.text_input(
-        "OpenAI API Key - [OpenAI](https://console.groq.com/keys)", key="api_key_llm", type="password"
-    )
+        "OpenAI API Key - [OpenAI](https://console.groq.com/keys)", key="api_key_llm", type="password" )
    
     web_search_mode = st.radio("Search & Scraping Tools", ["Tavily", "SerpApi"], horizontal = True)
     
@@ -39,7 +38,7 @@ with st.sidebar:
     )
    
     api_key_firecrawl = st.text_input(
-        "Firecrawl API Key - [Firecrawl](https://www.firecrawl.dev/)", key="api_key_firecrawl", type="password",value=""
+        "Firecrawl API Key - [Firecrawl](https://www.firecrawl.dev/)", key="api_key_firecrawl", type="password"
         
     )
     
@@ -103,8 +102,8 @@ if user_query:
         with st.spinner("Processing image..."):
             try:
                 
-                resp = st.session_state["image_processor"].process_image(image_data=bytes_data) 
-                user_inputs = resp.content
+                resp = st.session_state["image_processor"].process_image(image_data=bytes_data,user_input=user_input) 
+                user_input = resp.content
                 
             except Exception as e:
                 st.error(f"Analysis error: {e}")
@@ -129,7 +128,8 @@ if user_query:
                 st.markdown(response["message"])
         
             with st.spinner("Fetching product recommendations..."):
-                shopping_result = st.session_state["shopping_team"].run(response['data'])
+                shopping_result = st.session_state["shopping_team"].run(payload=response["data"])
+                
             with st.chat_message("assistant"):
                 st.html(shopping_result.content)
                

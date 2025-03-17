@@ -79,6 +79,7 @@ class Instructions:
 
     Rules:
     • Do not add any extra fields beyond those in the required keys plus "message".
+    • For a clothing / fashing item always ask for the gender.
     • Use a helpful, inviting tone. For example: 
       "Could you let me know your budget?" 
       "Do you have any brand preferences?" 
@@ -166,6 +167,7 @@ class Instructions:
         "   - **Direct Product Page URL**\n"
         "3. Format the output as a structured JSON array where each product is an object.\n"
         "4. If no products are found, return exactly: `{\"error\": \"No relevant products found\"}`\n"
+        "5. Limit your results to top 3 products`\n"
         "\n"
         "**Example Output Format:**\n"
         "```json\n"
@@ -381,7 +383,7 @@ class Instructions:
     "- If an input product contains `{ \"error\": \"Product details could not be retrieved\" }`, exclude it from the layout.\n"
     "- Ensure the **product image is displayed** if available, with a width of `150px`.\n"
     "- Make product names and product links clickable.\n"
-    "- **Do not return any extra text** before or after the HTML output."
+    "- **Do not return any extra text** before or after the HTML output. liek Comparison Result: ```html "
 )
 
 

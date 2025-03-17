@@ -80,7 +80,7 @@ class ShoppingTeam(Workflow):
         )
 
 
-    def run(self,payload:dict)-> Iterator[RunResponse]:
+    def run(self,payload:dict)-> RunResponse:
     
         logger.info("Starting Shopping Workflow...")
     
