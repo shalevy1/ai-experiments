@@ -16,7 +16,6 @@ This project is an AI-powered e-commerce shopping assistant that helps users fin
 -   **Enhanced Search Queries:** The assistant refines user queries to improve search results.
 -   **Web Search and Scraping:** It uses web search tools (Tavily or SerpApi) to find relevant product links and then scrapes product details from e-commerce websites.
 -   **Product Comparison:** The AI generates a visually appealing HTML-based comparison of the found products.
--   **Multiple LLM Support:** Supports Groq, OpenAI, and Gemini language models.
 - **Multiple Search Tool Support**: Supports Tavily and SerpApi search tools.
 - **Firecrawl**: Uses Firecrawl for web scraping.
 - **Streamlit**: Uses Streamlit for the user interface.
@@ -61,7 +60,7 @@ The project is organized into several key components:
 ## Usage
 
 1.  **Set API Keys:**
-    -   In the sidebar, select the LLM provider (Groq or OpenAI) and the search tool (Tavily or SerpApi).
+    -   In the sidebar, select the LLM provider OpenAI and the search tool (Tavily or SerpApi).
     -   Enter your API keys for the selected services.
     -   Click "Set keys".
 
