@@ -112,7 +112,7 @@ npx @modelcontextprotocol/inspector uvx mcp-sql-server --db-host <your_db_host> 
 Or if you've installed the package in a specific directory or are developing on it:
 
 ```bash
-cd path/to/servers/src/sql
+cd path/to/project
 npx @modelcontextprotocol/inspector uv run mcp-sql-server --db-host <your_db_host> --db-user <your_db_user> --db-password <your_db_password> --db-database <your_db_name>
 ```
 Running tail -n 20 -f ~/Library/Logs/Claude/mcp*.log will show the logs from the server and may help you debug any issues.
