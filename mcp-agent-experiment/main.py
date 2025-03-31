@@ -25,7 +25,7 @@ async def create_filesystem_agent(session: ClientSession) -> Agent:
     return Agent(
         model=Groq(
             id="llama-3.3-70b-versatile",
-            api_key='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'),
+            api_key='Your Key'),
         tools=[mcp_tools],
         instructions=dedent("""\
             You are an SQL agent.
@@ -55,9 +55,9 @@ async def run_agent(message: str) -> None:
             "--db-user",
             "root",
             "--db-password",
-            "password1234",
+            "passwordxxxxx",
             "--db-database",
-            "classicmodels",
+            "xxxxxx",
            
             
         ],
