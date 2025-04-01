@@ -9,5 +9,6 @@ dependencies = [
     "dotenv>=0.9.9",
     "groq>=0.20.0",
     "mcp>=1.6.0",
+    "openai>=1.70.0",
     "streamlit>=1.44.0",
 ]

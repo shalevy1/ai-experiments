@@ -4,7 +4,7 @@ import json
 from textwrap import dedent
 from typing import Optional, Dict, Any
 import traceback
-
+from agno.models.openai import OpenAIChat
 from dotenv import load_dotenv
 from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
@@ -16,8 +16,12 @@ from agno.utils.log import logger
 # --- Configuration ---
 
 load_dotenv()
-
-DEFAULT_MODEL_ID = "llama-3.3-70b-versatile"
+MODEL_ID = os.getenv("MODEL_ID")
+if not MODEL_ID:
+        raise ValueError("GROQ_API_KEY environment variable is not set.")
+MODEL_API_KEY = os.getenv("MODEL_API_KEY")
+if not MODEL_API_KEY:
+        raise ValueError("MODEL_API_KEY environment variable is not set.")
 
 VISUALIZATION_TYPES = {
     "time_series": "Data that changes over time (sales trends, user growth)",
@@ -194,31 +198,38 @@ def validate_dashboard_json(json_str: str) -> Dict[str, Any]:
         raise ValueError(f"Invalid JSON structure: {e}")
 
 
-async def mcp_agent(session: ClientSession, instructions: str, model_id: Optional[str] = None) -> Agent:
+async def mcp_agent(session: ClientSession, instructions: str) -> Agent:
     """Creates and configures an agent that interacts with an SQL database via MCP.
 
     Args:
         session: The MCP client session.
         instructions: The instructions for the agent.
-        model_id: The ID of the language model to use.
 
     Returns:
         The configured agent.
 
-    Raises:
-        ValueError: If the GROQ_API_KEY environment variable is not set.
+   
     """
-    groq_api_key = os.getenv("GROQ_API_KEY")
-    if not groq_api_key:
-        raise ValueError("GROQ_API_KEY environment variable is not set.")
-
-    model_id_to_use = model_id or os.getenv("MODEL_ID", DEFAULT_MODEL_ID)
+    
 
     mcp_tools = MCPTools(session=session)
     await mcp_tools.initialize()
+    logger.info(f"MODEL_ID: {MODEL_ID}")
+    if MODEL_ID == "gpt-4o":
+        
+        return Agent(
+                model=OpenAIChat(id=MODEL_ID, api_key=MODEL_API_KEY),
+                tools=[mcp_tools],
+                instructions=instructions,
+                markdown=True,
+                show_tool_calls=True,
+            )
+
+        
+
 
     return Agent(
-        model=Groq(id=model_id_to_use, api_key=groq_api_key),
+        model=Groq(id=MODEL_ID, api_key=MODEL_API_KEY),
         tools=[mcp_tools],
         instructions=instructions,
         markdown=True,
@@ -226,13 +237,12 @@ async def mcp_agent(session: ClientSession, instructions: str, model_id: Optiona
     )
 
 
-async def run_mcp_agent(message: str, instructions: str, model_id: Optional[str] = None, max_retries: int = 3) -> RunResponse:
+async def run_mcp_agent(message: str, instructions: str, max_retries: int = 3) -> RunResponse:
     """Runs an MCP agent with retry logic.
 
     Args:
         message: The message to send to the agent.
         instructions: The instructions for the agent.
-        model_id: The ID of the language model to use.
         max_retries: The maximum number of retries.
 
     Returns:
@@ -254,7 +264,7 @@ async def run_mcp_agent(message: str, instructions: str, model_id: Optional[str]
 
             async with stdio_client(server_params) as (read, write):
                 async with ClientSession(read, write) as session:
-                    agent = await mcp_agent(session=session, instructions=instructions, model_id=model_id)
+                    agent = await mcp_agent(session=session, instructions=instructions)
                     response = await agent.arun(message)
                     return response
 
@@ -275,12 +285,11 @@ async def run_mcp_agent(message: str, instructions: str, model_id: Optional[str]
 
 # --- Main Functions ---
 
-async def analyze_database(message: str, model_id: Optional[str] = None, max_retries: int = 3) -> RunResponse:
+async def analyze_database(message: str, max_retries: int = 3) -> RunResponse:
     """Analyzes the database schema and returns a JSON report.
 
     Args:
         message: The message to send to the agent.
-        model_id: The ID of the language model to use.
         max_retries: The maximum number of retries.
 
     Returns:
@@ -289,17 +298,15 @@ async def analyze_database(message: str, model_id: Optional[str] = None, max_ret
     return await run_mcp_agent(
         message=message,
         instructions=INSTRUCTIONS_DB_ANALYSIS_AND_SQL,
-        model_id=model_id,
         max_retries=max_retries,
     )
 
 
-async def get_data_from_database(analysis_json: str, model_id: Optional[str] = None, max_retries: int = 3) -> RunResponse:
+async def get_data_from_database(analysis_json: str, max_retries: int = 3) -> RunResponse:
     """Fetches data from the database based on the analysis JSON.
 
     Args:
         analysis_json: The JSON containing the SQL queries.
-        model_id: The ID of the language model to use.
         max_retries: The maximum number of retries.
 
     Returns:
@@ -308,39 +315,47 @@ async def get_data_from_database(analysis_json: str, model_id: Optional[str] = N
     return await run_mcp_agent(
         message=analysis_json,
         instructions=INSTRUCTIONS_SQL_METRIC_DATA_JSON_ONLY,
-        model_id=model_id,
         max_retries=max_retries,
     )
 
 
-async def generate_html_dashboard(data_json: str, model_id: Optional[str] = None) -> RunResponse:
+async def generate_html_dashboard(data_json: str) -> RunResponse:
     """Generates an HTML dashboard from the data JSON.
 
     Args:
         data_json: The JSON containing the data for the dashboard.
-        model_id: The ID of the language model to use.
+        
 
     Returns:
         The agent's response containing the HTML.
     """
     logger.info(f"Generating HTML dashboard from data: {data_json}")
-    model_id_to_use = model_id or os.getenv("MODEL_ID", DEFAULT_MODEL_ID)
-    agent = Agent(
-        model=Groq(id=model_id_to_use, api_key=os.getenv("GROQ_API_KEY")),
-        instructions=INSTRUCTIONS_RENDER_DASHBOARD_FROM_DATA,
-        markdown=True,
-        show_tool_calls=True,
-    )
+    
+    if MODEL_ID == "gpt-4o":
+        
+        agent = Agent(
+                model=OpenAIChat(id=MODEL_ID, api_key=MODEL_API_KEY),
+                instructions=INSTRUCTIONS_RENDER_DASHBOARD_FROM_DATA,
+                markdown=True,
+                show_tool_calls=True,
+            )
+    else:
+   
+        agent = Agent(
+            model=Groq(id=MODEL_ID, api_key=MODEL_API_KEY),
+            instructions=INSTRUCTIONS_RENDER_DASHBOARD_FROM_DATA,
+            markdown=True,
+            show_tool_calls=True,
+        )
     response = await agent.arun(data_json)
     return response
 
 
-async def run_agent(message: str, model_id: Optional[str] = None, max_retries: int = 3) -> RunResponse:
+async def run_agent(message: str, max_retries: int = 3) -> RunResponse:
     """Main entry point for the dashboard agent.
 
     Args:
         message: The message to send to the agent.
-        model_id: The ID of the language model to use.
         max_retries: The maximum number of retries for database analysis.
 
     Returns:
@@ -354,7 +369,7 @@ async def run_agent(message: str, model_id: Optional[str] = None, max_retries: i
     if missing_vars:
         raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
-    analysis_response = await analyze_database(message, model_id, max_retries)
+    analysis_response = await analyze_database(message, max_retries)
     analysis_json_str = analysis_response.content.strip()
 
     # Remove code block markers if present
@@ -371,7 +386,7 @@ async def run_agent(message: str, model_id: Optional[str] = None, max_retries: i
             return RunResponse(content=json.dumps({"error": "Failed to get valid JSON after multiple retries", "details": str(e)}))
         else:
             logger.warning("Retrying to get the right JSON")
-            analysis_response = await analyze_database(message, model_id, max_retries)
+            analysis_response = await analyze_database(message, max_retries)
             analysis_json_str = analysis_response.content.strip()
             if analysis_json_str.startswith("```json"):
                 analysis_json_str = analysis_json_str[7:]
@@ -383,14 +398,14 @@ async def run_agent(message: str, model_id: Optional[str] = None, max_retries: i
                 logger.error(f"Invalid JSON: {e}\n{analysis_json_str}")
                 return RunResponse(content=json.dumps({"error": "Failed to get valid JSON after multiple retries", "details": str(e)}))
 
-    data_response = await get_data_from_database(analysis_json_str, model_id)
+    data_response = await get_data_from_database(analysis_json_str)
     data_json_str = data_response.content.strip()
     if data_json_str.startswith("```json"):
         data_json_str = data_json_str[7:]
     if data_json_str.endswith("```"):
         data_json_str = data_json_str[:-3]
 
-    html_response = await generate_html_dashboard(data_json_str, model_id)
+    html_response = await generate_html_dashboard(data_json_str)
     html_str = html_response.content.strip()
     if html_str.startswith("```html"):
         html_str = html_str[7:]

@@ -9,45 +9,9 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from agno.utils.log import logger
 from typing import Optional
+from agno.models.openai import OpenAIChat
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Default model ID if not specified in environment variables
-DEFAULT_MODEL_ID = "llama-3.3-70b-versatile"
-
-
-async def db_connection_agent(session: ClientSession, model_id: Optional[str] = None) -> Agent:
-    """
-    Creates and configures an agent that interacts with an SQL database via MCP.
-
-    Args:
-        session (ClientSession): The MCP client session.
-        model_id (Optional[str]): The ID of the language model to use. Defaults to DEFAULT_MODEL_ID.
-
-    Returns:
-        Agent: The configured agent.
-
-    Raises:
-        ValueError: If the GROQ_API_KEY environment variable is not set.
-    """
-    # Check if GROQ_API_KEY is set
-    groq_api_key = os.getenv("GROQ_API_KEY")
-    if not groq_api_key:
-        raise ValueError("GROQ_API_KEY environment variable is not set.")
-
-    # Determine the model ID to use
-    model_id_to_use = model_id or os.getenv("MODEL_ID", DEFAULT_MODEL_ID)
-
-    # Initialize the MCP toolkit
-    mcp_tools = MCPTools(session=session)
-    await mcp_tools.initialize()
-
-    # Create and return the configured agent
-    return Agent(
-        model=Groq(id=model_id_to_use, api_key=groq_api_key),
-        tools=[mcp_tools],
-        instructions=dedent(
+INSTRUCTIONS = dedent(
     """\
     You are an intelligent SQL assistant with access to a database through the MCP tool.
 
@@ -85,10 +49,59 @@ async def db_connection_agent(session: ClientSession, model_id: Optional[str] = 
 
     Begin by reading the user's question and proceed accordingly.
     """
-),
+)
+
+# Load environment variables from .env file
+load_dotenv()
+MODEL_ID = os.getenv("MODEL_ID")
+if not MODEL_ID:
+        raise ValueError("GROQ_API_KEY environment variable is not set.")
+MODEL_API_KEY = os.getenv("MODEL_API_KEY")
+if not MODEL_API_KEY:
+        raise ValueError("MODEL_API_KEY environment variable is not set.")
+
+# Default model ID if not specified in environment variables
+DEFAULT_MODEL_ID = "llama-3.3-70b-versatile"
+
+
+async def db_connection_agent(session: ClientSession, model_id: Optional[str] = None) -> Agent:
+    """
+    Creates and configures an agent that interacts with an SQL database via MCP.
+
+    Args:
+        session (ClientSession): The MCP client session.
+        model_id (Optional[str]): The ID of the language model to use. Defaults to DEFAULT_MODEL_ID.
+
+    Returns:
+        Agent: The configured agent.
+
+    """
+    
+    # Initialize the MCP toolkit
+    mcp_tools = MCPTools(session=session)
+    await mcp_tools.initialize()
+    
+    if MODEL_ID == "gpt-4o":
+        
+        return Agent(
+            model=OpenAIChat(id=MODEL_ID, api_key=MODEL_API_KEY),
+            tools=[mcp_tools],
+            instructions=INSTRUCTIONS,
+            markdown=True,
+            show_tool_calls=True,
+        )
+    
+   
+    return Agent(
+        model=Groq(id=MODEL_ID, api_key=MODEL_API_KEY),
+        tools=[mcp_tools],
+        instructions=INSTRUCTIONS,
         markdown=True,
         show_tool_calls=True,
     )
+
+    # Create and return the configured agent
+    
 
 
 async def run_agent(message: str, model_id: Optional[str] = None) -> RunResponse:

@@ -60,6 +60,8 @@ This project demonstrates how to build an interactive SQL chatbot and a dynamic 
     DB_USER=your_db_user
     DB_PASSWORD=your_db_password
     DB_NAME=your_db_name
+    MODEL_API_KEY = API for OPENAI or GROQ
+    MODEL_ID = The ID of the language model to use like llama-3.3-70b-versatile or gpt-4o
     ```
 
 
