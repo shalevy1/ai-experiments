@@ -12,8 +12,12 @@ from agno.tools.mcp import MCPTools
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from agno.utils.log import logger
+from llm_model import get_model
 
 # --- Configuration ---
+
+MARKDOWN=False,
+SHOW_TOOL_CALLS=False,
 
 load_dotenv()
 MODEL_ID = os.getenv("MODEL_ID")
@@ -56,7 +60,7 @@ INSTRUCTIONS_DB_ANALYSIS_AND_SQL = dedent(
         - Visualization type (choose from: {visualization_types})
         - Visualization rationale
         - SQL query using correct table/column names
-    - Return all output as a valid JSON in the following format:
+    - Return all output as a valid JSON in the following format do not add any extra text:
 
     ```json
     {{
@@ -164,6 +168,17 @@ INSTRUCTIONS_RENDER_DASHBOARD_FROM_DATA = dedent(
 
 # --- Helper Functions ---
 
+def clean_json(data):
+    """Removes extra text from the beginning of a JSON string and parses it."""
+    start_index = data.find('{')
+    if start_index == -1:
+      start_index = data.find('[')
+      if start_index == -1:
+        raise ValueError("No JSON structure found in the string")
+    
+    cleaned_data = data[start_index:]
+    return cleaned_data
+
 def validate_dashboard_json(json_str: str) -> Dict[str, Any]:
     """Validates the structure of the dashboard JSON.
 
@@ -215,26 +230,20 @@ async def mcp_agent(session: ClientSession, instructions: str) -> Agent:
     mcp_tools = MCPTools(session=session)
     await mcp_tools.initialize()
     logger.info(f"MODEL_ID: {MODEL_ID}")
-    if MODEL_ID == "gpt-4o":
+    
         
-        return Agent(
-                model=OpenAIChat(id=MODEL_ID, api_key=MODEL_API_KEY),
-                tools=[mcp_tools],
-                instructions=instructions,
-                markdown=True,
-                show_tool_calls=True,
-            )
-
-        
-
-
     return Agent(
-        model=Groq(id=MODEL_ID, api_key=MODEL_API_KEY),
-        tools=[mcp_tools],
-        instructions=instructions,
-        markdown=True,
-        show_tool_calls=True,
-    )
+            model=get_model(MODEL_ID,MODEL_API_KEY),
+            tools=[mcp_tools],
+            instructions=instructions,
+            markdown=MARKDOWN,
+            show_tool_calls=SHOW_TOOL_CALLS,
+        )
+
+        
+
+
+    
 
 
 async def run_mcp_agent(message: str, instructions: str, max_retries: int = 3) -> RunResponse:
@@ -331,22 +340,15 @@ async def generate_html_dashboard(data_json: str) -> RunResponse:
     """
     logger.info(f"Generating HTML dashboard from data: {data_json}")
     
-    if MODEL_ID == "gpt-4o":
+    
         
-        agent = Agent(
-                model=OpenAIChat(id=MODEL_ID, api_key=MODEL_API_KEY),
-                instructions=INSTRUCTIONS_RENDER_DASHBOARD_FROM_DATA,
-                markdown=True,
-                show_tool_calls=True,
-            )
-    else:
-   
-        agent = Agent(
-            model=Groq(id=MODEL_ID, api_key=MODEL_API_KEY),
+    agent = Agent(
+            model=get_model(MODEL_ID,MODEL_API_KEY),
             instructions=INSTRUCTIONS_RENDER_DASHBOARD_FROM_DATA,
-            markdown=True,
-            show_tool_calls=True,
+            markdown=MARKDOWN,
+            show_tool_calls=SHOW_TOOL_CALLS,
         )
+    
     response = await agent.arun(data_json)
     return response
 
@@ -371,15 +373,15 @@ async def run_agent(message: str, max_retries: int = 3) -> RunResponse:
 
     analysis_response = await analyze_database(message, max_retries)
     analysis_json_str = analysis_response.content.strip()
-
+    logger.info(f"Analysis JSON: {analysis_json_str}")
     # Remove code block markers if present
     if analysis_json_str.startswith("```json"):
         analysis_json_str = analysis_json_str[7:]
     if analysis_json_str.endswith("```"):
         analysis_json_str = analysis_json_str[:-3]
-    
+    cleaned_json_str = clean_json(analysis_json_str)
     try:
-        validate_dashboard_json(analysis_json_str)
+        validate_dashboard_json(cleaned_json_str)
     except ValueError as e:
         logger.error(f"Invalid JSON: {e}\n{analysis_json_str}")
         if "Invalid JSON structure after multiple retries" in str(e):
@@ -393,19 +395,22 @@ async def run_agent(message: str, max_retries: int = 3) -> RunResponse:
             if analysis_json_str.endswith("```"):
                 analysis_json_str = analysis_json_str[:-3]
             try:
-                validate_dashboard_json(analysis_json_str)
+                cleaned_json_str = clean_json(analysis_json_str)
+                validate_dashboard_json(cleaned_json_str)
             except ValueError as e:
                 logger.error(f"Invalid JSON: {e}\n{analysis_json_str}")
                 return RunResponse(content=json.dumps({"error": "Failed to get valid JSON after multiple retries", "details": str(e)}))
 
     data_response = await get_data_from_database(analysis_json_str)
     data_json_str = data_response.content.strip()
+    logger.info(f"DATA JSON: {data_json_str}")
     if data_json_str.startswith("```json"):
         data_json_str = data_json_str[7:]
     if data_json_str.endswith("```"):
         data_json_str = data_json_str[:-3]
 
     html_response = await generate_html_dashboard(data_json_str)
+    logger.info(f"HTML CODE: {html_response}")
     html_str = html_response.content.strip()
     if html_str.startswith("```html"):
         html_str = html_str[7:]

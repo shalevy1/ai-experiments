@@ -4,12 +4,16 @@ from dotenv import load_dotenv
 from textwrap import dedent
 from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
+from agno.models.openai import OpenAIChat
 from agno.tools.mcp import MCPTools
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from agno.utils.log import logger
 from typing import Optional
-from agno.models.openai import OpenAIChat
+from llm_model import get_model
+
+
+
 
 INSTRUCTIONS = dedent(
     """\
@@ -81,26 +85,19 @@ async def db_connection_agent(session: ClientSession, model_id: Optional[str] = 
     mcp_tools = MCPTools(session=session)
     await mcp_tools.initialize()
     
-    if MODEL_ID == "gpt-4o":
-        
-        return Agent(
-            model=OpenAIChat(id=MODEL_ID, api_key=MODEL_API_KEY),
-            tools=[mcp_tools],
-            instructions=INSTRUCTIONS,
-            markdown=True,
-            show_tool_calls=True,
-        )
     
-   
+    # Create and return the configured agent
     return Agent(
-        model=Groq(id=MODEL_ID, api_key=MODEL_API_KEY),
+        model=get_model(model_id,MODEL_API_KEY),
         tools=[mcp_tools],
         instructions=INSTRUCTIONS,
         markdown=True,
         show_tool_calls=True,
     )
-
-    # Create and return the configured agent
+    
+   
+   
+    
     
 
 

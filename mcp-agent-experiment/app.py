@@ -54,6 +54,8 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "conversation_state" not in st.session_state:
     st.session_state.conversation_state = {}
+if "dashboard_html" not in st.session_state:
+    st.session_state.dashboard_html = ""
 
 # Tabs
 tab1, tab2 = st.tabs(["Chatbot", "Dashboard"])
@@ -115,7 +117,16 @@ with tab2:
                     __html =  __html.replace("```html", "")
                     if __html.endswith("```"):
                         __html = __html.replace("```", "")
+                st.session_state.dashboard_html = __html
                 display_html_dashboard(__html)
 
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+                
+    if st.session_state.dashboard_html:
+        st.download_button(
+            label="Download Dashboard HTML",
+            data=st.session_state.dashboard_html,
+            file_name="dashboard.html",
+            mime="text/html",
+        )
