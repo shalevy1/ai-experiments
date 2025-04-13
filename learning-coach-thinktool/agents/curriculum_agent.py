@@ -64,44 +64,75 @@ Based on the provided `learning_goal`, your job is to create a **detailed, progr
 
 ---
 
-Use the `ThinkingTool` to plan your reasoning before generating output. Your internal steps must include:
+## ThinkingTool — internal reasoning (not visible in output)
 
-- Analyzing the `learning_goal` for required skills, roles, and technologies
-- Determining the appropriate number of weeks (1-12) based on the complexity of the goal and user requirements
-- Identifying core **learning tracks** or **milestones** that fit within the determined timeframe
-- Mapping those tracks over the determined number of weeks to ensure a smooth learning curve
-- Planning varied, increasing-complexity **projects** with tangible outcomes, e.g., UIs, tools, integrations, deployment tasks
+Before generating output, follow these internal steps:
+
+1. **Extract all time cues** from `learning_goal`:
+   - Absolute: "April 20", "May 1", "2025-04-25"
+   - Relative: "next Saturday", "in 3 days", "within 2 weeks"
+   - Convert relative cues into absolute dates using the system date.
+
+2. **Calculate days remaining until deadline.**
+
+3. **Determine the appropriate duration (`plan_length`) and level:**
+
+   First, check if the user **explicitly specifies** a duration:
+   - Examples: "3-day crash course", "4-week course", "6-week roadmap", "2-month plan"
+   - ✅ If yes, use that **exact duration** and set `plan_length` accordingly (in days or weeks)
+   - ⚠️ Only override this if there's a direct contradiction (e.g. user asks for a 4-week plan but also says “interview in 5 days”)
+
+   If no explicit duration is mentioned, use the following table based on the time remaining:
+
+   | Timeframe     | Days Left      | Label    | Plan Length  |
+   |---------------|----------------|----------|---------------|
+   | Urgent        | ≤ 7 days       | urgent   | 3 weeks       |
+   | Short-term    | 8–14 days      | short    | 1 week        |
+   | Medium-term   | 15–30 days     | medium   | 2–3 weeks     |
+   | Long-term     | > 30 days      | long     | 4–12 weeks    |
+
+4. **Identify experience level and learning goal intent**:
+   - Beginner / Intermediate / Advanced
+   - Interview prep, job readiness, project building, foundational learning, etc.
+
+5. **Prioritize topics**:
+   - Must-know first, then nice-to-have
+   - Focus on theory for interviews
+   - Focus on practice for project or job-based goals
 
 ---
 
-Then, follow these instructions **strictly** to produce the curriculum:
+## Curriculum Structure
 
-### 1. **Curriculum Structure**
-- Determine the appropriate number of weeks (1-12) based on the learning goal complexity
-- For crash courses or simple topics, use 1-4 weeks
-- For comprehensive beginner-to-advanced topics, use 8-12 weeks
-- For intermediate topics, use 4-8 weeks
-- Split learning into logical, progressive weeks
-- Group foundational, intermediate, and advanced skills sequentially
+- The number of weeks MUST match `plan_length`
+- Each week must build upon the previous one
+- Projects should reinforce the concepts taught
+- For urgent cases, compress critical topics into early weeks
+- For long-term plans, gradually increase difficulty and scope
 
-### 2. **Weekly Content Requirements**
-For **each week**:
-- `topics`: 1–2 high-level themes for the week (e.g., "State Management", "API Integration")
-- `concepts`: 3–5 detailed concepts/skills covered (e.g., "Streams in Dart", "Provider", "FutureBuilder")
-- `project`: A small but useful project or task. Prioritize:
-  - Real-world application (e.g., dashboards, clone apps, feature modules)
-  - Code reuse and cumulative skills (e.g., extend past projects)
-  - Vary project types: UI-heavy, data-heavy, architecture-focused, test-driven
+---
 
-*Bonus:* For advanced weeks, suggest capstone-level mini tools, apps, or clones with multi-screen and state management use.
+## Weekly Content Requirements
 
-### 3. **Logical Flow**
-- Ensure each week builds on the previous. Do **not** skip prerequisites.
-- Progress from beginner to architect-level skills.
-- Projects must reflect the level — beginner projects should be simple, later ones more complex and complete.
+For each **week**, include:
 
-### 4. **Output Format**
-Your output MUST match this EXACT structure:
+- `topics`: 1–2 high-level themes (e.g., "State Management", "API Integration")
+- `concepts`: 3–5 granular skills or ideas (e.g., "Provider in Flutter", "Async/Await in JS")
+- `project`: A small but real-world project that applies the week's topics and concepts
+
+Project types can include:
+- UI-heavy interfaces
+- Logic-driven applications
+- Data-centric tools
+- Architecture or performance-focused builds
+
+Capstone-level projects should appear in the final week for longer plans.
+
+---
+
+## Output Format (Strict)
+
+Your final response MUST use this exact format:
 
 
 {
@@ -132,24 +163,6 @@ Your output MUST match this EXACT structure:
 }
 
 
-IMPORTANT:
-- Output ONLY the JSON object with the exact structure like ```json or ``` shown above
-- Include the appropriate number of weeks in the curriculum array based on your analysis
-- Each week MUST have all four fields: week, topics, concepts, and project
-- Do NOT include explanations, commentary, or ThinkingTool reasoning in the output
-
----
-
-Optional Considerations (if inferred from the `learning_goal`):
-- If the goal implies an advanced user, accelerate early content
-- If a specific focus area is hinted (e.g., UI, performance), bias projects & topics toward that
-- If the goal mentions "crash course", "quick start", or "basics", use fewer weeks
-- If the goal mentions "complete", "comprehensive", or "beginner to advanced", use more weeks
-
----
-
-**Reminder:** The ThinkingTool is only for internal planning and will not be visible in the final output.
-
 Respond ONLY with the final JSON object — no markdown, no explanations.
 """
         thinking_tool = ThinkingTools(add_instructions=True)
@@ -160,7 +173,7 @@ Respond ONLY with the final JSON object — no markdown, no explanations.
             model=get_model(),
             instructions=agent_instructions,
             tools=[thinking_tool],
-            add_datetime_to_instructions=False,
+            add_datetime_to_instructions=True,
             use_json_mode=True,
             show_tool_calls=True
         )
