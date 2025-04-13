@@ -40,7 +40,7 @@ Learning Coach is an intelligent AI-powered system that analyzes user learning g
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/vivekaxl/learning-coach.git
+    git clone https://github.com/vivekpathania/ai-experiments/tree/main/learning-coach-thinktool
     cd learning-coach
     ```
 
@@ -141,6 +141,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Thanks to [Groq](https://groq.com/) for their powerful LLM API
 - Built with [Streamlit](https://streamlit.io/) for the web interface
 - Package management by [UV](https://github.com/astral-sh/uv)
+- Agno for building teh agent  [AGNO](https://agno.com)
 ```
 
 This will:
