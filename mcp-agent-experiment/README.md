@@ -37,7 +37,7 @@ This project demonstrates how to build an interactive SQL chatbot and a dynamic 
 1.  **Clone the Repository:**
 
     ```bash
-    git clone <repository_url>
+    git clone https://github.com/vivekpathania/ai-experiments
     cd mcp-agent-experiment
     ```
 
