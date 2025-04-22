@@ -41,10 +41,8 @@ prompt_caching/
 │   ├── cache/
 │   │   └── prompt_cache.py    # Caching system implementation
 │   └── main.py                # Main application entry point
-├── tests/
-│   └── test_prompt_cache.py   # Test suite
+│   └── app.py                # Streamlit app
 ├── .env.example              # Example environment variables
-├── requirements.txt          # Project dependencies
 └── README.md                # Project documentation
 ```
 
@@ -52,7 +50,7 @@ prompt_caching/
 
 1. Start the Streamlit application:
 ```bash
-streamlit run src/main.py
+streamlit run app.py.py
 ```
 
 2. Access the application at `http://localhost:8501`
@@ -81,10 +79,6 @@ streamlit run src/main.py
 
 ## Development
 
-### Running Tests
-```bash
-pytest tests/
-```
 
 ### Code Style
 - Follow PEP 8 guidelines
