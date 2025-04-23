@@ -1,127 +1,104 @@
-"""
-ELI5 Agent Implementation
-
-This module implements an ELI5 (Explain Like I'm 5) agent using CrewAI.
-It provides simple, easy-to-understand explanations for complex topics,
-with built-in caching for improved performance.
-
-Features:
-    - Simple, clear explanations
-    - Response caching
-    - Configurable model and temperature
-    - Metadata tracking
-"""
-
+from crewai import Agent, Task, Crew, LLM
+import glob
+import json
 import os
-from typing import Tuple, Dict, Any
-from dotenv import load_dotenv
-from crewai import Agent, Task, Crew
 from cache.prompt_cache import load_response, save_response, get_cache_stats
+from dotenv import load_dotenv
 from datetime import datetime
+
 
 # Load environment variables
 load_dotenv()
 
 class ELI5Agent:
-    """
-    ELI5 Agent for generating simple explanations.
-    
-    This agent uses CrewAI to generate explanations that are easy to understand,
-    with built-in caching for improved performance and reduced API calls.
-    
-    Attributes:
-        model (str): The language model to use
-        temperature (float): Temperature for response generation
-        cache_enabled (bool): Whether to use response caching
-    """
-    
-    def __init__(self, model: str = None, temperature: float = 0.7, cache_enabled: bool = True):
-        """
-        Initialize the ELI5 agent.
-        
-        Args:
-            model (str, optional): Language model to use. Defaults to environment variable.
-            temperature (float, optional): Temperature for response generation. Defaults to 0.7.
-            cache_enabled (bool, optional): Whether to use response caching. Defaults to True.
-        """
-        self.model = model or os.getenv("MODEL_NAME", "gpt-3.5-turbo")
-        self.temperature = temperature
-        self.cache_enabled = cache_enabled
-        
-        # Initialize the agent with CrewAI
-        self.agent = Agent(
-            role="ELI5 Tutor",
-            goal="Explain complex topics in simple, easy-to-understand terms",
-            backstory="""You are an expert at explaining complex topics in simple terms.
-            You have a talent for breaking down difficult concepts into easy-to-understand explanations.""",
-            verbose=True,
-            allow_delegation=False,
-            llm_model=self.model,
-            temperature=self.temperature
+    def __init__(self):
+        self.model = os.getenv("AGENT_MODEL", "gpt-4")
+        self.temperature = float(os.getenv("AGENT_TEMPERATURE", "0.7"))
+        self.api_key = os.getenv("MODEL_API_KEY")
+        self.cache_enabled = os.getenv("CACHE_ENABLED", "True").lower() == "true"
+        if not self.api_key:
+            raise ValueError("MODEL_API_KEY not found in environment variables")
+
+    def __createAgent(self) -> Agent:
+        llm = LLM(
+            model=self.model,
+            temperature=self.temperature,
+            api_key=self.api_key
+        )
+        return Agent(
+            role="AI Tutor",
+            goal="Explain complex things in simple, child-friendly terms",
+            backstory="You're an expert educator who explains hard things like you're talking to a curious 5-year-old.",
+            llm=llm,
+            verbose=True
         )
 
-    def explain(self, topic: str) -> Tuple[str, Dict[str, Any]]:
-        """
-        Generate a simple explanation for a given topic.
-        
-        This method first checks the cache for a similar explanation. If none is found,
-        it generates a new explanation using the ELI5 agent and caches the result.
-        
-        Args:
-            topic (str): The topic to explain
-            
-        Returns:
-            Tuple[str, Dict[str, Any]]: The explanation and metadata about the response
-        """
-        # Check cache first if enabled
-        if self.cache_enabled:
-            cached_response = load_response(topic)
-            if cached_response:
-                return cached_response["response"], cached_response["metadata"]
-        
-        # Create a task for the agent
-        task = Task(
-            description=f"""Explain the following topic in simple terms that a 5-year-old could understand:
-            {topic}
-            
-            Make sure to:
-            1. Use simple language
-            2. Avoid technical terms
-            3. Use analogies when helpful
-            4. Keep it concise
-            """,
-            agent=self.agent
+    def __createTask(self, agent: Agent) -> Task:
+        return Task(
+            description="Answer the user's question {question} in a way that is easy to understand",
+            expected_output="A simple, child-friendly explanation of the user's prompt",
+            agent=agent,
         )
-        
-        # Create and run the crew
+
+
+    def _extract_response_text(self, crew_output) -> str:
+        """Extract the text content from a CrewOutput object."""
+        if hasattr(crew_output, 'raw_output'):
+            return str(crew_output.raw_output)
+        elif hasattr(crew_output, 'output'):
+            return str(crew_output.output)
+        return str(crew_output)
+
+    def explain(self, user_prompt: str) -> tuple[str, dict]:
+        # Check cache first
+        if self.cache_enabled:
+            cached_response = load_response(user_prompt)
+            if cached_response:
+                return cached_response["response"], {
+                    "cached": True,
+                    "model": self.model,
+                    "temperature": self.temperature,
+                    "timestamp": cached_response.get("timestamp", datetime.now().isoformat())
+                }
+
+        # Create agent and task
+        agent = self.__createAgent()
+        task = self.__createTask(agent)
         crew = Crew(
-            agents=[self.agent],
+            agents=[agent],
             tasks=[task],
             verbose=True
         )
+
+        # Get response
+        crew_output = crew.kickoff({"question": user_prompt})
         
-        # Get the response
-        result = crew.kickoff()
-        
+        # Extract the text content from the CrewOutput
+        response_text = self._extract_response_text(crew_output)
+
         # Prepare metadata
         metadata = {
+            "cached": False,
             "model": self.model,
             "temperature": self.temperature,
-            "cached": False,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         # Cache the response if enabled
         if self.cache_enabled:
-            save_response(topic, result, metadata)
-        
-        return result, metadata
+            save_response(user_prompt, response_text, metadata)
 
-    def get_cache_info(self) -> Dict[str, Any]:
+        return response_text, metadata
+
+    def get_cache_info(self) -> dict:
         """
         Get information about the cache.
         
         Returns:
-            Dict[str, Any]: Dictionary containing cache statistics
+            dict: Dictionary containing cache statistics including:
+                - total_entries: Number of cached responses
+                - total_size_bytes: Total size of cache in bytes
+                - oldest_entry: Timestamp of oldest cached response
+                - newest_entry: Timestamp of newest cached response
         """
         return get_cache_stats()

@@ -60,15 +60,6 @@ def display_cache_stats():
     # Custom CSS for styling the statistics display
     st.markdown("""
         <style>
-        /* Main content area */
-        .main .block-container {
-            background-color: #f0f2f6;
-            padding: 2rem;
-            border-radius: 1rem;
-            margin: 1rem 0;
-        }
-        
-        /* Stats container */
         .stats-container {
             background-color: white;
             padding: 1rem;
@@ -87,43 +78,6 @@ def display_cache_stats():
         .stats-value {
             font-size: 0.9rem;
             color: #666666;
-        }
-        
-        /* Chat cards */
-        .chat-card {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            margin: 1rem 0;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .question {
-            color: #31333F;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-        
-        .response {
-            color: #666666;
-            margin-bottom: 0.5rem;
-            line-height: 1.5;
-        }
-        
-        /* Form styling */
-        .stForm {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        /* Title styling */
-        h1 {
-            color: #31333F;
-            margin-bottom: 1.5rem;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -215,7 +169,7 @@ def main():
             st.markdown(f'<div class="response">🤖 {chat["response"]}</div>', unsafe_allow_html=True)
             
             # Display metadata using Streamlit's native components
-            if chat['metadata']['cached']:
+            if chat['metadata'].get('cached', False):
                 st.info(f"💾 From cache ({format_timestamp(chat['metadata']['timestamp'])})")
             else:
                 st.success(f"🤖 Generated with {chat['metadata']['model']} (temp: {chat['metadata']['temperature']})")
