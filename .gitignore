@@ -7,6 +7,10 @@ __pycache__/
 cache/data/
 **/cache/data/
 
+#output directory
+output/
+**/output/
+
 # C extensions
 *.so
 
