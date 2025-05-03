@@ -36,7 +36,7 @@ class StoryVideoCompiler:
         self.text_bg_color = '#ffffff90'
         self.text_padding = 30
         self.line_height = 6
-        self.margin = (5,5)
+        self.margin = (10,10)
         
     def _get_image_path(self, page: StoryPage, story: StoryOutput) -> Path:
         """Get the path to the generated image for a page."""
@@ -50,7 +50,7 @@ class StoryVideoCompiler:
         
     def _getTextPostiton(self, text_clip,image_clip,t):
         textH=text_clip.h
-        return ("center", image_clip.h-(t*(textH/(self.duration_per_page/2))))
+        return ("center", image_clip.h-(t*(textH/(self.duration_per_page))))
         
     def _create_page_clip(self, page: StoryPage, image_path: Path, audio_path: Path) -> CompositeVideoClip:
         """Create a video clip for a single page with image, text, and audio."""
@@ -148,27 +148,37 @@ if __name__ == "__main__":
     try:
         # Create a test story (you would normally get this from the story agent)
         test_story = StoryOutput(
-            title="Benny's Magic Manners",
+            title="The Little Seed of Kindness",
             pages=[
                 StoryPage(
-                    page_number=1,
-                    content="A little girl sharing her toys with friends",
-                    image_prompt="A little girl sharing her toys with friends"
+                    page_number=0,
+                    content="The Little Seed of Kindness",
+                    image_prompt="A colorful illustration of a smiling child holding a small seed, with a sunny background and fluffy white clouds. The title 'The Little Seed of Kindness' is written in bold, playful letters."
                 ),
                 StoryPage(
-                    page_number=2,
-                    content="The girl shared her toys with her friends and they all had a great time. She also shared her candy with her friends and they all had a great time. She shared her toys with her friends and they all had a great time. She also shared her candy with her friends and they all had a great time.",
-                    image_prompt="A little girl sharing her toys with friends"
+                   page_number= 1,
+                    content="Once upon a time, in a small village, there lived a little girl named Emma. She had a big heart and loved helping others. One day, Emma found a small seed on the ground and decided to plant it in her garden. She watered it every day and talked to it, saying 'I hope you grow into something beautiful!'",
+                    image_prompt="A warm illustration of Emma, a little girl with a big smile, planting a seed in her garden. She is surrounded by gardening tools and a watering can, with a sunny sky and a few birds flying overhead."
+                ),
+                StoryPage(
+                    page_number= 2,
+                    content="As the days went by, the seed started to grow into a small plant. Emma continued to care for it, and soon it blossomed into a beautiful flower. The flower attracted bees and butterflies, and its sweet fragrance filled the air. Emma was thrilled to see how her small act of kindness had brought so much joy to the world around her.",
+                    image_prompt="A vibrant illustration of the small plant growing into a beautiful flower, with Emma smiling and admiring it. Bees and butterflies are flying around the flower, collecting nectar, and the background is filled with colorful flowers and trees."
                 ),
                 StoryPage(
                     page_number=3,
-                    content="Everyone had a great time and they all went home happy.",
-                    image_prompt="A little girl sharing her toys with friends"
+                    content="Emma realized that just like the seed, our small acts of kindness can grow into something big and beautiful. She learned that kindness is never wasted, and it can make a difference in the lives of those around us. From that day on, Emma spread kindness wherever she went, and soon her whole village was filled with love, compassion, and beauty.",
+                    image_prompt="A heartwarming illustration of Emma standing in the middle of her village, surrounded by people and animals, all smiling and happy. The background is filled with colorful flowers, trees, and a bright sunny sky, symbolizing the positive impact of kindness."
+        ),
+                StoryPage(
+                    page_number=4,
+                    content="The moral of the story is that kindness is never wasted. Every small act of kindness can grow into something big and beautiful, making a difference in the lives of those around us. Remember, you have the power to spread kindness and make the world a brighter and more loving place!",
+                    image_prompt="A beautiful illustration of a child holding a small seed, with a big smile and a sparkle in their eye. The background is filled with colorful flowers, trees, and a sunny sky, with the words 'Kindness is never wasted' written in bold, playful letters."
                 )
             ],
-            moral="Sharing brings joy to everyone",
-            age_group="6-8",
-            word_count=10
+            moral="Kindness is never wasted",
+            age_group="6-11 years old",
+            word_count=396
         )
         
         # Create the video compiler
