@@ -8,6 +8,7 @@ dependencies = [
     "crewai>=0.118.0",
     "crewai-tools>=0.43.0",
     "elevenlabs>=1.57.0",
+    "fastapi>=0.115.9",
     "google-generativeai>=0.8.5",
     "moviepy>=2.1.2",
     "python-dotenv>=1.1.0",
