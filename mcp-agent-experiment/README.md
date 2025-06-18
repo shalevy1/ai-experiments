@@ -1,38 +1,34 @@
 # MCP SQL Chatbot & Dashboard
 
-This project demonstrates how to build an interactive SQL chatbot and a dynamic dashboard using natural language processing (NLP) and the Modular Control Protocol (MCP). It allows users to query an SQL database using natural language and visualize the data in a web-based dashboard.
+A Streamlit application that allows users to interact with an SQL database using natural language and visualize database trends. The application leverages the MCP (Modular Control Protocol) to connect to an SQL server, execute queries, and generate interactive dashboards.
 
 ## Features
 
-*   **Natural Language SQL Queries:** Interact with an SQL database using natural language. The chatbot understands your questions and translates them into SQL queries.
-*   **Dynamic Dashboard Generation:** Generate interactive HTML dashboards based on the database schema and data.
-*   **Database Schema Analysis:** The system analyzes the database schema to identify the domain, key metrics, and appropriate visualizations.
-*   **MCP Integration:** Leverages the Modular Control Protocol (MCP) for secure and efficient database interaction.
-*   **Interactive Charts:** Uses Chart.js to create interactive charts in the dashboard.
-*   **Responsive Design:** The generated dashboards are responsive and mobile-friendly, thanks to Tailwind CSS.
-*   **UV Package Manager:** Uses UV package manager for dependency management.
-
-## Project Structure
-
-*   **`app.py`:** The main Streamlit application that provides the user interface for the chatbot and dashboard.
-*   **`agent.py`:** Contains the code for the natural language SQL query agent.
-*   **`dashboard_agent.py`:** Contains the code for the dashboard generation agent.
+*   **Natural Language Interface:** Ask questions about your database in plain English.
+*   **SQL Query Generation:** Automatically converts natural language questions into SQL queries.
+*   **Interactive Dashboard:** Generates visualizations and insights from your database.
+*   **Real-time Results:** Get immediate responses to your queries.
+*   **Downloadable Dashboards:** Export your dashboards as HTML files.
 
 ## Prerequisites
 
-*   **UV:** This project uses the UV package manager. Install it by following the instructions on the UV website: https://astral.sh/uv.
-*   **Python 3.9+:** Ensure you have Python 3.9 or a later version installed.
-*   **MCP SQL Server:** You need an MCP SQL server running. You can set it up using the `uvx` command.
-*   **Database:** An SQL database (e.g., MySQL, PostgreSQL) with some data.
-*   **Environment Variables:** Set the following environment variables in a `.env` file in the project root:
-    *   `GROQ_API_KEY`: Your Groq API key.
-    *   `DB_HOST`: The hostname or IP address of your database server.
-    *   `DB_USER`: The username for your database.
-    *   `DB_PASSWORD`: The password for your database.
-    *   `DB_NAME`: The name of your database.
-    * `MODEL_ID`: The model id to use. (optional)
+*   Python 3.10 or higher
+*   UV package manager
+*   Access to a SQL database
+*   API key for either OpenAI or Groq
 
-## Setup and Installation (using UV)
+## Environment Variables
+
+Set the following environment variables in a `.env` file in the project root:
+
+*   `MODEL_API_KEY`: Your API key for either OpenAI or Groq
+*   `MODEL_ID`: The model ID to use (e.g., "llama-3.3-70b-versatile" for Groq or "gpt-4" for OpenAI)
+*   `DB_HOST`: The hostname or IP address of your database server
+*   `DB_USER`: The username for your database
+*   `DB_PASSWORD`: The password for your database
+*   `DB_NAME`: The name of your database
+
+## Setup and Installation
 
 1.  **Clone the Repository:**
 
@@ -47,42 +43,36 @@ This project demonstrates how to build an interactive SQL chatbot and a dynamic 
     uv sync
     ```
     This command will:
-    * Create a virtual environment if one does not exist.
-    * Install all the dependencies listed in the `pyproject.toml` file.
+    * Create a virtual environment if one does not exist
+    * Install all the dependencies listed in the `pyproject.toml` file
 
 3.  **Create `.env` File:**
 
     Create a `.env` file in the project root and add your environment variables:
 
     ```
-    
     DB_HOST=your_db_host
     DB_USER=your_db_user
     DB_PASSWORD=your_db_password
     DB_NAME=your_db_name
-    MODEL_API_KEY = API for OpenAI or GROQ
-    MODEL_ID = The ID of the language model to use like llama-3.3-70b-versatile or gpt-4o
+    MODEL_API_KEY=your_api_key
+    MODEL_ID=your_model_id
     ```
-    *Note :- Gives better results with OpenAI models
-
 
 ## Running the Application
 
 1.  **Activate the Virtual Environment:**
-    UV will create a `.venv` folder in your project.
     ```bash
     source .venv/bin/activate  # On Linux/macOS
-    .venv\Scripts\activate  # On Windows
+    .venv\Scripts\activate     # On Windows
     ```
 
 2.  **Run the Streamlit App:**
-
     ```bash
     streamlit run app.py
     ```
 
 3.  **Access the App:**
-
     Open your web browser and go to the URL provided in the terminal (usually `http://localhost:8501`).
 
 ## Usage
@@ -96,25 +86,34 @@ This project demonstrates how to build an interactive SQL chatbot and a dynamic 
 
 1.  **Generate Dashboard:** In the "Dashboard" tab, click the "Generate Dashboard" button.
 2.  **View Dashboard:** The app will analyze the database schema and generate an interactive HTML dashboard with charts and tables.
+3.  **Download Dashboard:** Click the "Download Dashboard HTML" button to save the dashboard as an HTML file.
 
 ## Key Components
 
 *   **`agent.py`:**
-    *   Defines the `db_connection_agent` which is responsible for understanding user queries and generating SQL.
-    *   Uses the `get_schema` and `read_query` tools from the MCP toolkit.
-    *   Returns a natural language summary of the query results.
+    *   Defines the agent that handles natural language to SQL conversion
+    *   Uses the MCP toolkit to interact with the SQL database
+    *   Implements async operations for efficient database communication
+    *   Returns natural language summaries of query results
+
 *   **`dashboard_agent.py`:**
-    *   Defines the `run_agent` function, which orchestrates the dashboard generation process.
-    *   Uses the `analyze_database` function to analyze the database schema and identify key metrics.
-    *   Uses the `get_data_from_database` function to fetch data for the identified metrics.
-    *   Uses the `generate_html_dashboard` function to create the HTML dashboard.
-    *   Includes retry logic and JSON validation.
+    *   Handles dashboard generation and visualization
+    *   Analyzes database schema to identify key metrics
+    *   Generates appropriate visualizations based on data types
+    *   Creates interactive HTML dashboards using Chart.js and Tailwind CSS
+
 *   **`app.py`:**
-    *   The main Streamlit application.
-    *   Provides the user interface for the chatbot and dashboard.
-    *   Uses `st.session_state` to persist chat messages.
-    *   Uses `st.container` and JavaScript to keep the chat at the top of the screen.
-    *   Uses `st.tabs` to create the "Chatbot" and "Dashboard" tabs.
+    *   Main Streamlit application
+    *   Provides the user interface for both chatbot and dashboard
+    *   Manages async operations using a persistent event loop
+    *   Handles session state and user interactions
+
+## Technical Details
+
+*   **Async Operations:** The application uses Python's asyncio for efficient database operations
+*   **Event Loop Management:** A persistent event loop is maintained for Streamlit compatibility
+*   **MCP Integration:** Uses the latest MCP library for SQL server communication
+*   **Model Support:** Compatible with both OpenAI and Groq language models
 
 ## Contributing
 

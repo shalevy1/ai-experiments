@@ -213,39 +213,7 @@ def validate_dashboard_json(json_str: str) -> Dict[str, Any]:
         raise ValueError(f"Invalid JSON structure: {e}")
 
 
-async def mcp_agent(session: ClientSession, instructions: str) -> Agent:
-    """Creates and configures an agent that interacts with an SQL database via MCP.
-
-    Args:
-        session: The MCP client session.
-        instructions: The instructions for the agent.
-
-    Returns:
-        The configured agent.
-
-   
-    """
     
-
-    mcp_tools = MCPTools(session=session)
-    await mcp_tools.initialize()
-    logger.info(f"MODEL_ID: {MODEL_ID}")
-    
-        
-    return Agent(
-            model=get_model(MODEL_ID,MODEL_API_KEY),
-            tools=[mcp_tools],
-            instructions=instructions,
-            markdown=MARKDOWN,
-            show_tool_calls=SHOW_TOOL_CALLS,
-        )
-
-        
-
-
-    
-
-
 async def run_mcp_agent(message: str, instructions: str, max_retries: int = 3) -> RunResponse:
     """Runs an MCP agent with retry logic.
 
@@ -257,25 +225,25 @@ async def run_mcp_agent(message: str, instructions: str, max_retries: int = 3) -
     Returns:
         The agent's response.
     """
+    
+    
+    
+    
     retries = 0
     while retries < max_retries:
         try:
-            server_params = StdioServerParameters(
-                command="uvx",
-                args=[
-                    "mcp-sql-server",
-                    "--db-host", os.getenv("DB_HOST"),
-                    "--db-user", os.getenv("DB_USER"),
-                    "--db-password", os.getenv("DB_PASSWORD"),
-                    "--db-database", os.getenv("DB_NAME"),
-                ],
-            )
-
-            async with stdio_client(server_params) as (read, write):
-                async with ClientSession(read, write) as session:
-                    agent = await mcp_agent(session=session, instructions=instructions)
-                    response = await agent.arun(message)
-                    return response
+            cmd = f'uvx mcp-sql-server --db-host {os.getenv("DB_HOST")} --db-user {os.getenv("DB_USER")} --db-password {os.getenv("DB_PASSWORD")} --db-database {os.getenv("DB_NAME")}'
+            async with MCPTools(command=cmd) as mcp_tools:
+                agent = Agent(
+                    model=get_model(MODEL_ID,MODEL_API_KEY),
+                    tools=[mcp_tools],
+                    instructions=instructions,
+                    markdown=MARKDOWN,
+                    show_tool_calls=SHOW_TOOL_CALLS,
+                )
+                response = await agent.arun(message)
+                return response
+          
 
         except json.JSONDecodeError as e:
             logger.error(f"JSON decoding error: {e}\n{traceback.format_exc()}")

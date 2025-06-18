@@ -68,33 +68,7 @@ if not MODEL_API_KEY:
 DEFAULT_MODEL_ID = "llama-3.3-70b-versatile"
 
 
-async def db_connection_agent(session: ClientSession, model_id: Optional[str] = None) -> Agent:
-    """
-    Creates and configures an agent that interacts with an SQL database via MCP.
 
-    Args:
-        session (ClientSession): The MCP client session.
-        model_id (Optional[str]): The ID of the language model to use. Defaults to DEFAULT_MODEL_ID.
-
-    Returns:
-        Agent: The configured agent.
-
-    """
-    
-    # Initialize the MCP toolkit
-    mcp_tools = MCPTools(session=session)
-    await mcp_tools.initialize()
-    
-    
-    # Create and return the configured agent
-    return Agent(
-        model=get_model(model_id,MODEL_API_KEY),
-        tools=[mcp_tools],
-        instructions=INSTRUCTIONS,
-        markdown=True,
-        show_tool_calls=True,
-    )
-    
    
    
     
@@ -122,27 +96,16 @@ async def run_agent(message: str, model_id: Optional[str] = None) -> RunResponse
     if missing_vars:
         raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
-    # Configure MCP server parameters
-    server_params = StdioServerParameters(
-        command="uvx",
-        args=[
-            "mcp-sql-server",
-            "--db-host",
-            os.getenv("DB_HOST"),
-            "--db-user",
-            os.getenv("DB_USER"),
-            "--db-password",
-            os.getenv("DB_PASSWORD"),
-            "--db-database",
-            os.getenv("DB_NAME"),
-        ],
-    )
-
-    # Connect to the MCP server and run the agent
     try:
-        async with stdio_client(server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                agent = await db_connection_agent(session, model_id)
+        cmd = f'uvx mcp-sql-server --db-host {os.getenv("DB_HOST")} --db-user {os.getenv("DB_USER")} --db-password {os.getenv("DB_PASSWORD")} --db-database {os.getenv("DB_NAME")}'
+        async with MCPTools(command=cmd) as mcp_tools:
+                agent = Agent(
+                    model=get_model(MODEL_ID,MODEL_API_KEY),
+                    tools=[mcp_tools],
+                    instructions=INSTRUCTIONS,
+                    markdown=True,
+                    show_tool_calls=True,
+                )
                 response = await agent.arun(message)
                 return response
     except Exception as e:

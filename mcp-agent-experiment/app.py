@@ -3,8 +3,11 @@ import asyncio
 import json
 from agent import run_agent
 from dashboard_agent import run_agent as run_dashboard_agent
-
 from typing import Dict, Any
+
+# Create an event loop for async operations
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
 st.set_page_config(
     page_title="MCP SQL Chatbot & Dashboard",
@@ -87,7 +90,7 @@ with tab1:
 
         with st.spinner("Fetching response from the database..."):
             try:
-                resp = asyncio.run(run_agent(user_query))
+                resp = loop.run_until_complete(run_agent(user_query))
             except Exception as e:
                 st.error(f"An error occurred: {e}")
                 resp = None
@@ -101,8 +104,6 @@ with tab1:
                 with st.chat_message("assistant"):
                     st.markdown(resp.content)
 
-    
-
 # Dashboard Tab
 with tab2:
     st.header("Database Dashboard")
@@ -110,7 +111,7 @@ with tab2:
     if st.button("Generate Dashboard"):
         with st.spinner("Analyzing database and generating dashboard..."):
             try:
-                dashboard_response = asyncio.run(run_dashboard_agent("Analyse my database and suggest a dashboard"))
+                dashboard_response = loop.run_until_complete(run_dashboard_agent("Analyse my database and suggest a dashboard"))
                 #remove  ```html if present
                 __html = dashboard_response.content
                 if __html.startswith("```html"):
